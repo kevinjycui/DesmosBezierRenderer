@@ -1,0 +1,11 @@
+*.mp4
+*.mov
+*.png
+
+env
+env/*
+
+__pycache__/
+__pycache__/*
+
+cache.json
