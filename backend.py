@@ -19,7 +19,7 @@ DYNAMIC_BLOCK = True
 
 BLOCK_SIZE = 25
 MAX_EXPR_PER_BLOCK = 7500
-FRAME_DIR = 'frames3'
+FRAME_DIR = 'frames'
 
 
 def get_contours(filename):
@@ -94,6 +94,8 @@ def index():
         total = 0
         i = frame
         while total < MAX_EXPR_PER_BLOCK:
+            if i >= len(frame_latex):
+                break
             number_of_frames += 1
             total += len(frame_latex[i])
             block.append(frame_latex[i])
