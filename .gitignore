@@ -1,6 +1,10 @@
 *.mp4
 *.mov
 *.png
+*.webm
+
+!github/*.png
+!icon.png
 
 env
 env/*
