@@ -1,10 +1,13 @@
-*.mp4
+*.flv
+*.gif
+*.jpeg
+*.jpg
 *.mov
+*.mp4
 *.png
 *.webm
 
 !github/*.png
-!icon.png
 
 env
 env/*
