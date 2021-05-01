@@ -74,7 +74,7 @@ def get_latex(filename):
 frame_latex = []
 
 for i in range(len(os.listdir(FRAME_DIR))):
-    frame_latex.append(get_latex(FRAME_DIR + '/frames%d.png' % (i+1)))
+    frame_latex.append(get_latex(FRAME_DIR + '/frame%d.png' % (i+1)))
 
 # with open('cache.json', 'w+') as f:
 #     json.dump(frame_latex, f)
