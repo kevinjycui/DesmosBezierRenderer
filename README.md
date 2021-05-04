@@ -9,7 +9,7 @@ A simple image/video to Desmos graph converter run locally
 ![](github/result.png)
 
 ## Setup
-#### This wont work out of the box on windows, the easiest way to do this on windows is to [download wsl](https://www.microsoft.com/store/productId/9N6SVWS3RX71) to run all the commands below. You can find it produces under the `\\wsl$\` file path on your pc.
+#### This wont work out of the box on windows, the easiest way to do this on windows is to [download wsl](https://www.microsoft.com/store/productId/9N6SVWS3RX71) to run all the commands below. You can find it produces under the `\\wsl$\Ubuntu-20.04\home` path on your pc.
 Install dependencies
 ```sh
 apt update
