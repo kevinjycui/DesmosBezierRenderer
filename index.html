@@ -14,16 +14,22 @@
         var calculator = Desmos.GraphingCalculator(elt);
         var defaultState;
         var latex;
+        var width;
+        var height;
+        var total_frames;
 
         xhr = new XMLHttpRequest();
         const interval = setInterval(() => {
-            xhr.open('GET', `http://127.0.0.1:5000/?frame=0`);
+            xhr.open('GET', `http://127.0.0.1:5000/?frame=-1`);
             xhr.send();
         }, 1000);
         xhr.onload = function() {
             clearInterval(interval);
             latex = JSON.parse(xhr.response);
-            calculator.setExpression({ id: 'frame', latex: 'f=0', color: '#2464b4', sliderBounds: { step: 1, max: latex.total_frames, min: 0 } });
+            width = latex.width;
+            height = latex.height;
+            total_frames = latex.total_frames;
+            calculator.setExpression({ id: 'frame', latex: 'f=0', color: '#2464b4', sliderBounds: { step: 1, max: total_frames, min: 0 } });
             var f = calculator.HelperExpression({ latex: 'f' });
             f.observe('numericValue', function() {
                 if (Number.isNaN(f.numericValue) || f.numericValue <= 0) return;
@@ -36,7 +42,7 @@
         var loaded_frames = 0;
         var old_frames = 0;
         function renderFrame(frame) {
-            if (frame >= latex.total_frames) return;
+            if (frame >= total_frames) return;
             if (frame >= loaded_frames) { // No frames in queue, get more
                 xhr = new XMLHttpRequest();
                 xhr.open('GET', `http://127.0.0.1:5000/?frame=${frame}`);
@@ -51,7 +57,7 @@
             } else {
                 calculator.setState(defaultState);
                 calculator.setExpression( { id: 'frame', latex: 'f=' + (frame + 1) } );
-                calculator.setViewport([0, latex.width, 0, latex.height]);
+                calculator.setViewport([0, width, 0, height]);
                 calculator.setExpressions(latex.result[frame - old_frames]);
 
                 setTimeout(function() {
@@ -67,6 +73,5 @@
                 }, Math.max(3 * MILLIS_PER_LINE, latex.result[frame - old_frames].length * MILLIS_PER_LINE));
             }
         }
-   
    </script>
 </html>
