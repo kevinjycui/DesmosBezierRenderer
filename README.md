@@ -26,9 +26,11 @@ Install requirements
 ```sh
 python3 -m venv env
 . env/bin/activate
+```
+To set up pypotrace, follow the guide for your OS [here](https://pypi.org/project/pypotrace) *once again, this will not work on windows, use wsl if you are on windows.* Then run:
+```sh
 pip3 install -r requirements.txt
 ```
-
 Create a directory called `frames` and add images named `frame%d.png` where `%d` represents the frame-number starting from 1. To render just a single image, add a single image named `frame1.png` in the directory. Works best with 360p to 480p resolution (may have to lower the resolution further with more complex frames). 
 
 You can change the `DYNAMIC_BLOCK`, `BLOCK_SIZE`, and `MAX_EXPR_PER_BLOCK` constants in `backend.py` to change the number of expressions the backend will send to the frontend per call (too much will cause a memory error, too little could kill the backend with too many requests). This only really matters if you are rendering a video. The `index.html` file also has some settings (`DOWNLOAD_IMAGES` and `MILLIS_PER_LINE`), if you would like to download each frame or slow down the render you should check that out. If you enable auto downloading of images, you should probably use firefox as chrome will prompt you constantly and the download bar gets in the way.
