@@ -76,8 +76,8 @@ def get_latex(filename):
     return latex
 
 frame_latex = []
-height = 0
 width = 0
+height = 0
 
 for i in range(len(os.listdir(FRAME_DIR))):
     exprid = 0
@@ -95,6 +95,8 @@ def index():
     frame = int(request.args.get('frame'))
     if frame >= len(os.listdir(FRAME_DIR)):
         return {'result': None}
+    if frame == -1:
+        return json.dumps({'width': width, 'height': height, 'total_frames': len(os.listdir(FRAME_DIR))})
     block = []
     if not DYNAMIC_BLOCK:
         number_of_frames = min(frame + BLOCK_SIZE, len(os.listdir(FRAME_DIR))) - frame
@@ -111,6 +113,6 @@ def index():
             total += len(frame_latex[i])
             block.append(frame_latex[i])
             i += 1
-    return json.dumps({'result': block, 'number_of_frames': number_of_frames, 'height': height, 'width': width, 'total_frames': len(os.listdir(FRAME_DIR))})
+    return json.dumps({'result': block, 'number_of_frames': number_of_frames})
 
 app.run()
