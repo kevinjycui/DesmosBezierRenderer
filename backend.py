@@ -22,9 +22,13 @@ MAX_EXPR_PER_BLOCK = 7500
 FRAME_DIR = 'frames'
 
 
-def get_contours(filename):
+def get_contours(filename,):
     image = cv2.imread(filename)
     cv2.waitKey(0)
+
+    global height, width
+    height = max(height, image.shape[0])
+    width = max(width, image.shape[1])
 
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     edged = cv2.Canny(gray, 30, 200)
@@ -72,9 +76,16 @@ def get_latex(filename):
     return latex
 
 frame_latex = []
+height = 0
+width = 0
 
 for i in range(len(os.listdir(FRAME_DIR))):
-    frame_latex.append(get_latex(FRAME_DIR + '/frame%d.png' % (i+1)))
+    exprid = 0
+    exprs = []
+    for expr in get_latex(FRAME_DIR + '/frame%d.png' % (i+1)):
+        exprid += 1
+        exprs.append({'id': 'expr-' + str(exprid), 'latex': expr, 'color': '#2464b4'})
+    frame_latex.append(exprs)
 
 # with open('cache.json', 'w+') as f:
 #     json.dump(frame_latex, f)
@@ -100,6 +111,6 @@ def index():
             total += len(frame_latex[i])
             block.append(frame_latex[i])
             i += 1
-    return json.dumps({'result': block, 'number_of_frames': number_of_frames})
+    return json.dumps({'result': block, 'number_of_frames': number_of_frames, 'height': height, 'width': width, 'total_frames': len(os.listdir(FRAME_DIR))})
 
 app.run()
