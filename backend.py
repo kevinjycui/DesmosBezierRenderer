@@ -22,7 +22,7 @@ MAX_EXPR_PER_BLOCK = 7500
 FRAME_DIR = 'frames'
 
 
-def get_contours(filename,):
+def get_contours(filename):
     image = cv2.imread(filename)
     cv2.waitKey(0)
 
