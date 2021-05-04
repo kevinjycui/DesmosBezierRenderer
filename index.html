@@ -1,12 +1,12 @@
-<script src="https://www.desmos.com/api/v1.3/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
+<script src='https://www.desmos.com/api/v1.3/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6'></script>
 <html lang='en'>
    <head>
       <title>Desmos | Graphing Calculator</title>
       <link rel='icon' href='https://www.desmos.com/favicon.ico'>
    </head>
-   <div id="calculator" style="width: 100%; height: 100%;"></div>
+   <div id='calculator' style='width: 100%; height: 100%;'></div>
    <script>
-        var DOWNLOAD_IMAGES = false // Whether or not to download images
+        var DOWNLOAD_IMAGES = true // Whether or not to download images
         var MILLIS_PER_LINE = 5 // How many milliseconds to wait per line, set this higher if some frames aren't rendering
 
 
@@ -17,7 +17,7 @@
 
         xhr = new XMLHttpRequest();
         const interval = setInterval(() => {
-            xhr.open("GET", `http://127.0.0.1:5000/?frame=0`);
+            xhr.open('GET', `http://127.0.0.1:5000/?frame=0`);
             xhr.send();
         }, 1000);
         xhr.onload = function() {
@@ -26,58 +26,44 @@
             calculator.setExpression({ id: 'frame', latex: 'f=0', color: '#2464b4', sliderBounds: { step: 1, max: latex.total_frames, min: 0 } });
             var f = calculator.HelperExpression({ latex: 'f' });
             f.observe('numericValue', function() {
-                if (Number.isNaN(f.numericValue)) return;
-                if (f.numericValue < 0 && DOWNLOAD_IMAGES) { // Trigger multiple downloads prompt
-                    var img = calculator.screenshot();
-                    var imgcont = document.createElement("a");
-                    imgcont.href = img;
-                    imgcont.download = "prompt";
-                    imgcont.innerHTML = "<img src=" + img + ">";
-                    document.body.appendChild(imgcont);
-                    setTimeout(() => imgcont.click(), 3000)
-                    setTimeout(() => imgcont.click(), 3000)
-                    setTimeout(() => document.body.removeChild(imgcont), 3000)
-                    return
-                } else if (f.numericValue > 0) {
-                    f.unobserve('numericValue');
-                    setTimeout(() => main(--f.numericValue), 3000);
-                }
-            });
-            defaultState = calculator.getState(); // We need a state to keep the frame counter
+                if (Number.isNaN(f.numericValue) || f.numericValue <= 0) return;
+                f.unobserve('numericValue');
+                setTimeout(() => renderFrame(--f.numericValue), 1000);
+                });
+            defaultState = calculator.getState(); // We need a state to keep the frame counter at the top of the expressions list
         }
 
         var loaded_frames = 0;
         var old_frames = 0;
-        function main(frame) {
+        function renderFrame(frame) {
             if (frame >= latex.total_frames) return;
-            console.log(frame + " " + loaded_frames);
-            if (frame >= loaded_frames) {
+            if (frame >= loaded_frames) { // No frames in queue, get more
                 xhr = new XMLHttpRequest();
-                xhr.open("GET", `http://127.0.0.1:5000/?frame=${frame}`);
+                xhr.open('GET', `http://127.0.0.1:5000/?frame=${frame}`);
                 xhr.send();
                 xhr.onload = function() {
                     latex = JSON.parse(xhr.response);
                     if (latex.result === null) return;
                     loaded_frames += latex.number_of_frames;
-                    old_frames = frame
-                    main(frame)
+                    old_frames = frame;
+                    renderFrame(frame); // Render next frame
                 }
             } else {
                 calculator.setState(defaultState);
-                calculator.setExpression( { id: 'frame', latex: 'f=' + (frame + 1) } )
+                calculator.setExpression( { id: 'frame', latex: 'f=' + (frame + 1) } );
                 calculator.setViewport([0, latex.width, 0, latex.height]);
                 calculator.setExpressions(latex.result[frame - old_frames]);
-            
+
                 setTimeout(function() {
                     var img = calculator.screenshot();
-                    var imgcont = document.createElement("a");
+                    var imgcont = document.createElement('a');
                     imgcont.href = img;
-                    imgcont.download = ("frame-" + ++frame).padStart(10, "0");
-                    imgcont.innerHTML = "<img src=" + img + ">";
+                    imgcont.download = 'frame-' + String(++frame).padStart(5, '0');
+                    imgcont.innerHTML = `<img src= ${img}>`;
                     document.body.appendChild(imgcont);
                     if (DOWNLOAD_IMAGES) imgcont.click();
-                    setTimeout(() => document.body.removeChild(imgcont), 3000)
-                    main(frame); // Call self recursively
+                    setTimeout(() => document.body.removeChild(imgcont), 3000);
+                    renderFrame(frame); // Render next frame
                 }, Math.max(3 * MILLIS_PER_LINE, latex.result[frame - old_frames].length * MILLIS_PER_LINE));
             }
         }
