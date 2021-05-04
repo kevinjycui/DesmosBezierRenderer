@@ -20,7 +20,7 @@
 
         xhr = new XMLHttpRequest();
         const interval = setInterval(() => {
-            xhr.open('GET', `http://127.0.0.1:5000/?frame=-1`);
+            xhr.open('GET', `http://127.0.0.1:5000/init`);
             xhr.send();
         }, 1000);
         xhr.onload = function() {
