@@ -13,12 +13,12 @@ A simple image/video to Desmos graph converter run locally
 Install dependencies
 ```sh
 apt update
-apt install git python3-dev python3-pip
+apt install git python3-dev python3-pip build-essential libagg-dev libpotrace-dev pkg-config
 ```
 
 Clone repository
 ```sh
-git clone https://github.com/kevinjycui/DesmosBezierRenderer.git
+git clone git@github.com:kevinjycui/DesmosBezierRenderer.git
 cd DesmosBezierRenderer
 ```
 
@@ -26,9 +26,6 @@ Install requirements
 ```sh
 python3 -m venv env
 . env/bin/activate
-```
-To set up pypotrace, follow the guide for your OS [here](https://pypi.org/project/pypotrace) *once again, this will not work on windows, use wsl if you are on windows.* Then run:
-```sh
 pip3 install -r requirements.txt
 ```
 Create a directory called `frames` and add images named `frame%d.png` where `%d` represents the frame-number starting from 1. To render just a single image, add a single image named `frame1.png` in the directory. Works best with 360p to 480p resolution (may have to lower the resolution further with more complex frames). 
