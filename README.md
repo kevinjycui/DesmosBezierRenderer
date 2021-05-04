@@ -12,7 +12,7 @@ A simple image/video to Desmos graph converter run locally
 Install dependencies
 ```sh
 apt update
-apt install git python3-dev python3-pip
+apt install git python3-dev python3-pip build-essential libagg-dev libpotrace-dev pkg-config
 ```
 
 Clone repository
