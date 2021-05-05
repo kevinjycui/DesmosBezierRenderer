@@ -6,9 +6,6 @@
    </head>
    <div id='calculator' style='width: 100%; height: 100%;'></div>
    <script>
-        const DOWNLOAD_IMAGES = true // Whether or not to download images
-
-
         var elt = document.getElementById('calculator');
         var calculator = Desmos.GraphingCalculator(elt, {lockViewport: false, showGrid: true, showYAxis: true, showXAxis: true});
         var inner = elt.getElementsByClassName("dcg-graph-outer")[0]; // The part of the screen with a visible grid
@@ -16,6 +13,7 @@
         var latex;
         var width;
         var height;
+        var download_images;
         var total_frames;
 
         xhr = new XMLHttpRequest();
@@ -29,6 +27,7 @@
             width = latex.width;
             height = latex.height;
             total_frames = latex.total_frames;
+            download_images = latex.download_images;
             calculator.setExpression({ id: 'frame', latex: 'f=0', color: '#2464b4', sliderBounds: { step: 1, max: total_frames, min: 0 } });
             var f = calculator.HelperExpression({ latex: 'f' });
             f.observe('numericValue', function() {
