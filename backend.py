@@ -16,6 +16,7 @@ CORS(app)
 
 
 DYNAMIC_BLOCK = True
+DOWNLOAD_IMAGES = True
 
 BLOCK_SIZE = 25
 MAX_EXPR_PER_BLOCK = 7500
@@ -25,6 +26,10 @@ FRAME_DIR = 'frames'
 def get_contours(filename):
     image = cv2.imread(filename)
     cv2.waitKey(0)
+
+    global height, width
+    height = max(height, image.shape[0])
+    width = max(width, image.shape[1])
 
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     edged = cv2.Canny(gray, 30, 200)
@@ -72,9 +77,16 @@ def get_latex(filename):
     return latex
 
 frame_latex = []
+width = 0
+height = 0
 
 for i in range(len(os.listdir(FRAME_DIR))):
-    frame_latex.append(get_latex(FRAME_DIR + '/frame%d.png' % (i+1)))
+    exprid = 0
+    exprs = []
+    for expr in get_latex(FRAME_DIR + '/frame%d.png' % (i+1)):
+        exprid += 1
+        exprs.append({'id': 'expr-' + str(exprid), 'latex': expr, 'color': '#2464b4'})
+    frame_latex.append(exprs)
 
 # with open('cache.json', 'w+') as f:
 #     json.dump(frame_latex, f)
@@ -84,6 +96,7 @@ def index():
     frame = int(request.args.get('frame'))
     if frame >= len(os.listdir(FRAME_DIR)):
         return {'result': None}
+
     block = []
     if not DYNAMIC_BLOCK:
         number_of_frames = min(frame + BLOCK_SIZE, len(os.listdir(FRAME_DIR))) - frame
@@ -100,6 +113,10 @@ def index():
             total += len(frame_latex[i])
             block.append(frame_latex[i])
             i += 1
-    return json.dumps({'result': block, 'number_of_frames': number_of_frames})
+    return json.dumps({'result': block, 'number_of_frames': number_of_frames}) # Number_of_frames is the number of newly loaded frames, not the total frames
+
+@app.route('/init')
+def init():
+    return json.dumps({'width': width, 'height': height, 'total_frames': len(os.listdir(FRAME_DIR)), 'download_images': DOWNLOAD_IMAGES})
 
 app.run()
