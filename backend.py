@@ -16,6 +16,7 @@ CORS(app)
 
 
 DYNAMIC_BLOCK = True
+DOWNLOAD_IMAGES = True
 
 BLOCK_SIZE = 25
 MAX_EXPR_PER_BLOCK = 7500
@@ -116,6 +117,6 @@ def index():
 
 @app.route('/init')
 def init():
-    return json.dumps({'width': width, 'height': height, 'total_frames': len(os.listdir(FRAME_DIR))})
+    return json.dumps({'width': width, 'height': height, 'total_frames': len(os.listdir(FRAME_DIR)), 'download_images': DOWNLOAD_IMAGES})
 
 app.run()
