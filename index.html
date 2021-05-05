@@ -6,12 +6,12 @@
    </head>
    <div id='calculator' style='width: 100%; height: 100%;'></div>
    <script>
-        var DOWNLOAD_IMAGES = true // Whether or not to download images
-        var MILLIS_PER_LINE = 5 // How many milliseconds to wait per line, set this higher if some frames aren't rendering
+        const DOWNLOAD_IMAGES = true // Whether or not to download images
 
 
         var elt = document.getElementById('calculator');
-        var calculator = Desmos.GraphingCalculator(elt);
+        var calculator = Desmos.GraphingCalculator(elt, {lockViewport: false, showGrid: true, showYAxis: true, showXAxis: true});
+        var inner = elt.getElementsByClassName("dcg-graph-outer")[0]; // The part of the screen with a visible grid
         var defaultState;
         var latex;
         var width;
@@ -19,11 +19,11 @@
         var total_frames;
 
         xhr = new XMLHttpRequest();
-        const interval = setInterval(() => {
+        const interval = setInterval(() => { // Attempt backend connection
             xhr.open('GET', `http://127.0.0.1:5000/init`);
             xhr.send();
         }, 1000);
-        xhr.onload = function() {
+        xhr.onload = () => { // Setup when backend connects successfully
             clearInterval(interval);
             latex = JSON.parse(xhr.response);
             width = latex.width;
@@ -34,44 +34,52 @@
             f.observe('numericValue', function() {
                 if (Number.isNaN(f.numericValue) || f.numericValue <= 0) return;
                 f.unobserve('numericValue');
-                setTimeout(() => renderFrame(--f.numericValue), 1000);
+                setTimeout(() => renderFrame(--f.numericValue), 3000); // Wait for additional keystrokes
                 });
-            defaultState = calculator.getState(); // We need a state to keep the frame counter at the top of the expressions list
+
+            defaultState = calculator.getState(); // setBlank erases everything, we use a state instead to keep the f=0 at the top
         }
 
-        var loaded_frames = 0;
-        var old_frames = 0;
+        var loaded_frames = 0; // All frames loaded from backend so far
+        var old_frames = 0; // Frames rendered prior to last backend request
         function renderFrame(frame) {
-            if (frame >= total_frames) return;
-            if (frame >= loaded_frames) { // No frames in queue, get more
+            if (frame >= total_frames) return; // Animation finished
+            if (frame >= loaded_frames) { // No more loaded frames, request more
                 xhr = new XMLHttpRequest();
                 xhr.open('GET', `http://127.0.0.1:5000/?frame=${frame}`);
                 xhr.send();
-                xhr.onload = function() {
+                xhr.onload = () => {
                     latex = JSON.parse(xhr.response);
                     if (latex.result === null) return;
                     loaded_frames += latex.number_of_frames;
                     old_frames = frame;
-                    renderFrame(frame); // Render next frame
+                    renderFrame(frame);
                 }
-            } else {
+            } else { // Render the next frame
+                const viewport = calculator.getState().graph.viewport;
                 calculator.setState(defaultState);
                 calculator.setExpression( { id: 'frame', latex: 'f=' + (frame + 1) } );
-                calculator.setViewport([0, width, 0, height]);
+                calculator.setViewport([viewport.xmin, viewport.xmax, viewport.ymin, viewport.ymax]); // setState resets the viewport, set it back to what it was
                 calculator.setExpressions(latex.result[frame - old_frames]);
 
-                setTimeout(function() {
-                    var img = calculator.screenshot();
-                    var imgcont = document.createElement('a');
-                    imgcont.href = img;
-                    imgcont.download = 'frame-' + String(++frame).padStart(5, '0');
-                    imgcont.innerHTML = `<img src= ${img}>`;
-                    document.body.appendChild(imgcont);
-                    if (DOWNLOAD_IMAGES) imgcont.click();
-                    setTimeout(() => document.body.removeChild(imgcont), 3000);
-                    renderFrame(frame); // Render next frame
-                }, Math.max(3 * MILLIS_PER_LINE, latex.result[frame - old_frames].length * MILLIS_PER_LINE));
+                const params = {
+                    mode: 'stretch',
+                    mathBounds: { left: 0, bottom: 0, right: width, top: height },
+                    width: width,
+                    height: height
+                }
+                calculator.asyncScreenshot(params, screenshot => handleScreenshot(screenshot, ++frame)); // Waits for frame to render, takes a screenshot and runs handleScreenshot
             }
+        }
+
+        const imgcont = document.createElement('a');
+        document.body.appendChild(imgcont);
+        function handleScreenshot(screenshot, frame) {
+            imgcont.href = screenshot;
+            imgcont.download = 'frame-' + String(frame).padStart(5, '0');
+            imgcont.innerHTML = `<img src= ${screenshot}>`;
+            if (DOWNLOAD_IMAGES) imgcont.click();
+            setTimeout(() => renderFrame(frame), 150);
         }
    </script>
 </html>
