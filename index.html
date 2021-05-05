@@ -78,7 +78,7 @@
             imgcont.href = screenshot;
             imgcont.download = 'frame-' + String(frame).padStart(5, '0');
             imgcont.innerHTML = `<img src= ${screenshot}>`;
-            if (DOWNLOAD_IMAGES) imgcont.click();
+            if (download_images) imgcont.click();
             setTimeout(() => renderFrame(frame), 150);
         }
    </script>
