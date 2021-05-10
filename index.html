@@ -1,54 +1,85 @@
-<script src="https://www.desmos.com/api/v1.3/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
+<script src='https://www.desmos.com/api/v1.3/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6'></script>
 <html lang='en'>
    <head>
       <title>Desmos | Graphing Calculator</title>
       <link rel='icon' href='https://www.desmos.com/favicon.ico'>
    </head>
-   <div id="calculator" style="width: 100%; height: 100%;"></div>
+   <div id='calculator' style='width: 100%; height: 100%;'></div>
    <script>
         var elt = document.getElementById('calculator');
-        var calculator = Desmos.GraphingCalculator(elt);
-    
-        function changeGraph(key, latex, frame) {
-            while (key > 0) {
-                calculator.removeExpression({ id: 'expr-' + key });
-                key--;
-            }
-            for (var expr of latex) {
-                //    console.log(expr);
-                key++;
-                calculator.setExpression({ id: 'expr-' + key, latex: expr, color: '#2464b4' });
-            }
-            return key;
+        var calculator = Desmos.GraphingCalculator(elt, {showGrid: true, showYAxis: true, showXAxis: true});
+
+        var inner = elt.getElementsByClassName("dcg-graph-outer")[0]; // The part of the screen with a visible grid
+        var defaultState;
+        var latex;
+        var width;
+        var height;
+        var download_images;
+        var total_frames;
+
+        xhr = new XMLHttpRequest();
+        const interval = setInterval(() => { // Attempt backend connection
+            xhr.open('GET', `http://127.0.0.1:5000/init`);
+            xhr.send();
+        }, 1000);
+        xhr.onload = () => { // Setup when backend connects successfully
+            clearInterval(interval);
+            latex = JSON.parse(xhr.response);
+            width = latex.width;
+            height = latex.height;
+            total_frames = latex.total_frames;
+            download_images = latex.download_images;
+            calculator.setExpression({ id: 'frame', latex: 'f=0', color: '#2464b4', sliderBounds: { step: 1, max: total_frames, min: 0 } });
+            var f = calculator.HelperExpression({ latex: 'f' });
+            f.observe('numericValue', function() {
+                if (Number.isNaN(f.numericValue) || f.numericValue <= 0) return;
+                f.unobserve('numericValue');
+                setTimeout(() => renderFrame(--f.numericValue), 3000); // Wait for additional keystrokes
+                });
+
+            defaultState = calculator.getState(); // setBlank erases everything, we use a state instead to keep the f=0 at the top
         }
-   
-        function init() {
-            var key = 0;
-            var frame = 0;
-            var top = 0;
-            var bottom = 0;
 
-            var latex;
-   
-            const interval = setInterval(function() {
-                if (frame < top) {
-                    key = changeGraph(key, latex.result[frame - bottom], frame);
-                    frame++;
-                } else {
-                    xhr = new XMLHttpRequest();
-                    xhr.open("GET", `http://127.0.0.1:5000/?frame=${frame}`);
-                    xhr.send();
-                    xhr.onload = function(e) {
-                        latex = JSON.parse(xhr.response);
-                        if (latex.result === null)
-                            clearInterval(interval);
-                        bottom = frame;
-                        top += latex.number_of_frames;
-                    }
+        var loaded_frames = 0; // All frames loaded from backend so far
+        var old_frames = 0; // Frames rendered prior to last backend request
+        function renderFrame(frame) {
+            if (frame >= total_frames) return; // Animation finished
+            if (frame >= loaded_frames) { // No more loaded frames, request more
+                xhr = new XMLHttpRequest();
+                xhr.open('GET', `http://127.0.0.1:5000/?frame=${frame}`);
+                xhr.send();
+                xhr.onload = () => {
+                    latex = JSON.parse(xhr.response);
+                    if (latex.result === null) return;
+                    loaded_frames += latex.number_of_frames;
+                    old_frames = frame;
+                    renderFrame(frame);
                 }
+            } else { // Render the next frame
+                const viewport = calculator.getState().graph.viewport;
+                calculator.setState(defaultState);
+                calculator.setExpression( { id: 'frame', latex: 'f=' + (frame + 1) } );
+                calculator.setViewport([viewport.xmin, viewport.xmax, viewport.ymin, viewport.ymax]); // setState resets the viewport, set it back to what it was
+                calculator.setExpressions(latex.result[frame - old_frames]);
 
-            }, 1000);
-       }
-   
+                const params = {
+                    mode: 'stretch',
+                    mathBounds: { left: 0, bottom: 0, right: width, top: height },
+                    width: width,
+                    height: height
+                }
+                calculator.asyncScreenshot(params, screenshot => handleScreenshot(screenshot, ++frame)); // Waits for frame to render, takes a screenshot and runs handleScreenshot
+            }
+        }
+
+        const imgcont = document.createElement('a');
+        document.body.appendChild(imgcont);
+        function handleScreenshot(screenshot, frame) {
+            imgcont.href = screenshot;
+            imgcont.download = 'frame-' + String(frame).padStart(5, '0');
+            imgcont.innerHTML = `<img src= ${screenshot}>`;
+            if (download_images) imgcont.click();
+            setTimeout(() => renderFrame(frame), 150);
+        }
    </script>
 </html>
