@@ -8,6 +8,8 @@ import numpy as np
 import potrace
 import cv2
 
+import multiprocessing
+from time import time
 import os
 
 
@@ -15,27 +17,32 @@ app = Flask(__name__)
 CORS(app)
 
 
-DYNAMIC_BLOCK = True
-DOWNLOAD_IMAGES = True
+DYNAMIC_BLOCK = True # Automatically find the right block size
+BLOCK_SIZE = 25 # Number of frames per block (ignored if DYNAMIC_BLOCK is true)
+MAX_EXPR_PER_BLOCK = 7500 # Maximum lines per block, doesn't effect lines per frame (ignored if DYNAMIC_BLOCK is false)
 
-BLOCK_SIZE = 25
-MAX_EXPR_PER_BLOCK = 7500
-FRAME_DIR = 'frames'
+FRAME_DIR = 'frames' # The folder where the frames are stored relative to this file
+DOWNLOAD_IMAGES = True # Download each rendered frame automatically (works best in firefox)
+USE_L2_GRADIENT = True # Creates less edges but is still accurate (leads to faster renders)
+SHOW_GRID = False # Show the grid in the background while rendering
 
 
-def get_contours(filename):
+def get_contours(filename, nudge = .33):
     image = cv2.imread(filename)
 
-    global height, width
-    height = max(height, image.shape[0])
-    width = max(width, image.shape[1])
-
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    edged = cv2.Canny(gray, 30, 200)
-    
-    contours, hierarchy = cv2.findContours(edged, 
-        cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    
+    median = max(10, min(245, np.median(gray)))
+    lower = int(max(0, (1 - nudge) * median))
+    upper = int(min(255, (1 + nudge) * median))
+    filtered = cv2.bilateralFilter(gray, 5, 50, 50)
+    edged = cv2.Canny(filtered, lower, upper, L2gradient = USE_L2_GRADIENT)
+
+    with frame.get_lock():
+        frame.value += 1
+        height.value = max(height.value, image.shape[0])
+        width.value = max(width.value, image.shape[1])
+    print('\r--> Frame %d/%d' % (frame.value, len(os.listdir(FRAME_DIR))), end='')
+
     return edged[::-1]
 
 
@@ -43,14 +50,12 @@ def get_trace(data):
     for i in range(len(data)):
         data[i][data[i] > 1] = 1
     bmp = potrace.Bitmap(data)
-    path = bmp.trace()
+    path = bmp.trace(2, potrace.TURNPOLICY_MINORITY, 1.0, 1, .5)
     return path
 
 
 def get_latex(filename):
-
     latex = []
-
     path = get_trace(get_contours(filename))
 
     for curve in path.curves:
@@ -71,31 +76,34 @@ def get_latex(filename):
                 (1-t)((1-t)((1-t)%f+t%f)+t((1-t)%f+t%f))+t((1-t)((1-t)%f+t%f)+t((1-t)%f+t%f)))' % \
                 (x0, x1, x1, x2, x1, x2, x2, x3, y0, y1, y1, y2, y1, y2, y2, y3))
             start = segment.end_point
-
     return latex
 
-frame_latex = []
-width = 0
-height = 0
-
-print('Desmos Bezier Renderer')
-print('Junferno 2021')
-print('https://github.com/kevinjycui/DesmosBezierRenderer')
-
-print('-----------------------------')
-
-print('Processing %d frames... Please wait for processing to finish before running on frontend\n' % len(os.listdir(FRAME_DIR)))
-
-for i in range(len(os.listdir(FRAME_DIR))):
-    print('\r--> Frame %d/%d' % (i+1, len(os.listdir(FRAME_DIR))), end='')
+def get_expressions(frame):
     exprid = 0
     exprs = []
-    for expr in get_latex(FRAME_DIR + '/frame%d.png' % (i+1)):
+    for expr in get_latex(FRAME_DIR + '/frame%d.png' % (frame+1)):
         exprid += 1
-        exprs.append({'id': 'expr-' + str(exprid), 'latex': expr, 'color': '#2464b4'})
-    frame_latex.append(exprs)
+        exprs.append({'id': 'expr-' + str(exprid), 'latex': expr, 'color': '#2464b4', 'secret': True})
+    return exprs
 
-print('\r--> Processing complete\n')
+frame = multiprocessing.Value('i', 0)
+height = multiprocessing.Value('i', 0, lock = False)
+width = multiprocessing.Value('i', 0, lock = False)
+frame_latex =  range(len(os.listdir(FRAME_DIR)))
+
+with multiprocessing.Pool(processes = multiprocessing.cpu_count()) as pool:
+    print('Desmos Bezier Renderer')
+    print('Junferno 2021')
+    print('https://github.com/kevinjycui/DesmosBezierRenderer')
+
+    print('-----------------------------')
+
+    print('Processing %d frames... Please wait for processing to finish before running on frontend\n' % len(os.listdir(FRAME_DIR)))
+
+    start = time()
+    frame_latex = pool.map(get_expressions, frame_latex)
+    
+    print('\r--> Processing complete in %.1f seconds\n' % (time() - start))
 
 # with open('cache.json', 'w+') as f:
 #     json.dump(frame_latex, f)
@@ -126,6 +134,6 @@ def index():
 
 @app.route('/init')
 def init():
-    return json.dumps({'width': width, 'height': height, 'total_frames': len(os.listdir(FRAME_DIR)), 'download_images': DOWNLOAD_IMAGES})
+    return json.dumps({'height': height.value, 'width': width.value, 'total_frames': len(os.listdir(FRAME_DIR)), 'download_images': DOWNLOAD_IMAGES, 'show_grid': SHOW_GRID})
 
 app.run()
