@@ -73,7 +73,10 @@ def get_latex(filename):
 
 frame_latex = []
 
+print('Processing %d frames... Please wait for processing to finish before running on frontend' % len(os.listdir(FRAME_DIR)))
+
 for i in range(len(os.listdir(FRAME_DIR))):
+    print('--> Frame %d/%d' % (i+1, len(os.listdir(FRAME_DIR))))
     frame_latex.append(get_latex(FRAME_DIR + '/frames%d.png' % (i+1)))
 
 # with open('cache.json', 'w+') as f:
