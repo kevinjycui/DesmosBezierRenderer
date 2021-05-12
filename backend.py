@@ -23,6 +23,7 @@ MAX_EXPR_PER_BLOCK = 7500 # Maximum lines per block, doesn't affect lines per fr
 
 FRAME_DIR = 'frames' # The folder where the frames are stored relative to this file
 FILE_EXT = 'png' # Extension for frame files
+COLOUR = '#2464b4' # Colour of lines on graph output
 DOWNLOAD_IMAGES = True # Download each rendered frame automatically (works best in firefox)
 USE_L2_GRADIENT = True # Creates less edges but is still accurate (leads to faster renders)
 SHOW_GRID = False # Show the grid in the background while rendering
@@ -84,7 +85,7 @@ def get_expressions(frame):
     exprs = []
     for expr in get_latex(FRAME_DIR + '/frame%d.%s' % (frame+1, FILE_EXT)):
         exprid += 1
-        exprs.append({'id': 'expr-' + str(exprid), 'latex': expr, 'color': '#2464b4', 'secret': True})
+        exprs.append({'id': 'expr-' + str(exprid), 'latex': expr, 'color': COLOUR, 'secret': True})
     return exprs
 
 frame = multiprocessing.Value('i', 0)

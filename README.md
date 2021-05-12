@@ -42,6 +42,7 @@ Constants in the `backend.py` file can be changed to optimise or customise your 
 | `MAX_EXPR_PER_BLOCK` | Integer | Maximum lines per block, doesn't affect lines per frame | Ignored if `DYNAMIC_BLOCK` is false |
 | `FRAME_DIR` | String | The folder where the frames are stored relative to this file | `'frames'` |
 | `FILE_EXT` | String | Extension for frame files | `'png'`, `'jpg'`, etc. |
+| `COLOUR` | String | Hex value of colour for graph output | Desmos blue is `'#2464b4'` |
 | `DOWNLOAD_IMAGES` | Boolean | Download each rendered frame automatically (works best in Firefox) | If true, each frame is screenshotted automatically. Works best in Firefox, as chromium browsers will constantly prompt for downloads
 | `USE_L2_GRADIENT` | Boolean | Creates less edges but is still accurate (leads to faster renders) | |
 | `SHOW_GRID` | Boolean | Show the grid in the background while rendering | |
