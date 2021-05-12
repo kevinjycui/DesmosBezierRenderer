@@ -22,6 +22,7 @@ BLOCK_SIZE = 25 # Number of frames per block (ignored if DYNAMIC_BLOCK is true)
 MAX_EXPR_PER_BLOCK = 7500 # Maximum lines per block, doesn't affect lines per frame (ignored if DYNAMIC_BLOCK is false)
 
 FRAME_DIR = 'frames' # The folder where the frames are stored relative to this file
+FILE_EXT = 'png' # Extension for frame files
 DOWNLOAD_IMAGES = True # Download each rendered frame automatically (works best in firefox)
 USE_L2_GRADIENT = True # Creates less edges but is still accurate (leads to faster renders)
 SHOW_GRID = False # Show the grid in the background while rendering
@@ -81,7 +82,7 @@ def get_latex(filename):
 def get_expressions(frame):
     exprid = 0
     exprs = []
-    for expr in get_latex(FRAME_DIR + '/frame%d.png' % (frame+1)):
+    for expr in get_latex(FRAME_DIR + '/frame%d.%s' % (frame+1, FILE_EXT)):
         exprid += 1
         exprs.append({'id': 'expr-' + str(exprid), 'latex': expr, 'color': '#2464b4', 'secret': True})
     return exprs
