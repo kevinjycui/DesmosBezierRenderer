@@ -33,7 +33,7 @@ Create a directory called `frames` and add images named `frame%d.png` where `%d`
 mkdir frames
 ...
 ```
-#### Parameters
+#### Settings
 Constants in the `backend.py` file can be changed to optimise or customise your render. Note that a "block" refers to what is passed from the backend to the frontend per HTTP request.
 | Variable | Type | Description | Notes |
 | --- | --- | --- | --- |
