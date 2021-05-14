@@ -18,7 +18,7 @@ apt install git python3-dev python3-pip build-essential libagg-dev libpotrace-de
 
 Clone repository
 ```sh
-git clone git@github.com:kevinjycui/DesmosBezierRenderer.git
+git clone https://github.com/kevinjycui/DesmosBezierRenderer.git
 cd DesmosBezierRenderer
 ```
 
