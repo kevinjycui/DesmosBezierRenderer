@@ -89,24 +89,25 @@ def get_expressions(frame):
         exprs.append({'id': 'expr-' + str(exprid), 'latex': expr, 'color': COLOUR, 'secret': True})
     return exprs
 
-frame = multiprocessing.Value('i', 0)
-height = multiprocessing.Value('i', 0, lock = False)
-width = multiprocessing.Value('i', 0, lock = False)
-frame_latex =  range(len(os.listdir(FRAME_DIR)))
+if __name__ == '__main__':
+    frame = multiprocessing.Value('i', 0)
+    height = multiprocessing.Value('i', 0, lock = False)
+    width = multiprocessing.Value('i', 0, lock = False)
+    frame_latex =  range(len(os.listdir(FRAME_DIR)))
 
-with multiprocessing.Pool(processes = multiprocessing.cpu_count()) as pool:
-    print('Desmos Bezier Renderer')
-    print('Junferno 2021')
-    print('https://github.com/kevinjycui/DesmosBezierRenderer')
+    with multiprocessing.Pool(processes = multiprocessing.cpu_count()) as pool:
+        print('Desmos Bezier Renderer')
+        print('Junferno 2021')
+        print('https://github.com/kevinjycui/DesmosBezierRenderer')
 
-    print('-----------------------------')
+        print('-----------------------------')
 
-    print('Processing %d frames... Please wait for processing to finish before running on frontend\n' % len(os.listdir(FRAME_DIR)))
+        print('Processing %d frames... Please wait for processing to finish before running on frontend\n' % len(os.listdir(FRAME_DIR)))
 
-    start = time()
-    frame_latex = pool.map(get_expressions, frame_latex)
-    
-    print('\r--> Processing complete in %.1f seconds\n' % (time() - start))
+        start = time()
+        frame_latex = pool.map(get_expressions, frame_latex)
+
+        print('\r--> Processing complete in %.1f seconds\n' % (time() - start))
 
 # with open('cache.json', 'w+') as f:
 #     json.dump(frame_latex, f)
