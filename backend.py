@@ -140,4 +140,4 @@ def index():
 def init():
     return json.dumps({'height': height.value, 'width': width.value, 'total_frames': len(os.listdir(FRAME_DIR)), 'download_images': DOWNLOAD_IMAGES, 'show_grid': SHOW_GRID})
 
-app.run()
+app.run(host = '0.0.0.0')
