@@ -114,7 +114,7 @@ if __name__ == '__main__':
 
 @app.route('/')
 def index():
-    frame = int(request.args.get('frame'))
+    frame = int(request.args.get('frame',0))
     if frame >= len(os.listdir(FRAME_DIR)):
         return {'result': None}
 
