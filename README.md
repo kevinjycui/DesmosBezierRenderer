@@ -52,4 +52,24 @@ Run backend (This may take a while depending on the size and complexity of the f
 python3 backend.py
 ```
 
+The following is an example of the output
+```sh
+Desmos Bezier Renderer
+Junferno 2021
+https://github.com/kevinjycui/DesmosBezierRenderer
+-----------------------------
+Processing 513 frames... Please wait for processing to finish before running on frontend
+
+--> Processing complete in 7.4 seconds
+
+ * Serving Flask app "backend" (lazy loading)
+ * Environment: production
+   WARNING: This is a development server. Do not use it in a production deployment.
+   Use a production WSGI server instead.
+ * Debug mode: off
+ * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+127.0.0.1 - - [17/Sep/2021 01:28:46] "GET /init HTTP/1.1" 200 -
+127.0.0.1 - - [17/Sep/2021 01:28:50] "GET /?frame=0 HTTP/1.1" 200 -
+```
+
 Load `index.html` into a web browser and put `f=1` into the first formula in the formula window. The image should start rendering or the video should start playing at a slow rate.
