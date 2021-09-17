@@ -2,11 +2,7 @@
 
 A simple image/video to Desmos graph converter run locally. Rotoscopes images using Canny and Potrace edge detection as Bezier curves on Desmos Graphing Calculator.
 
-### Sample
-![](github/sample.png)
-
-### Result
-![](github/result.png)
+![](github/figures.png)
 
 ## Setup
 #### This guide won't work out of the box on Windows. The easiest way to do this on Windows is to [download WSL](https://www.microsoft.com/store/productId/9N6SVWS3RX71) to run all the commands below. You can find it produces under the `\\wsl$\Ubuntu-20.04\home` path on your PC.
