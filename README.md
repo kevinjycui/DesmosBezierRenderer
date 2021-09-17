@@ -30,7 +30,7 @@ mkdir frames
 ...
 ```
 #### Settings
-Constants in the `backend.py` file can be changed to optimise or customise your render. Note that a "block" refers to what is passed from the backend to the frontend per HTTP request.
+Constants in the `backend.py` file can be changed to optimise or customise your render via command-line arguments. Note that a "block" refers to what is passed from the backend to the frontend per HTTP request.
 | Variable | Type | Description | Notes |
 | --- | --- | --- | --- |
 | `DYNAMIC_BLOCK` | Boolean | Automatically find the right block size | If unsure, leave as true
@@ -44,6 +44,8 @@ Constants in the `backend.py` file can be changed to optimise or customise your 
 | `SHOW_GRID` | Boolean | Show the grid in the background while rendering | |
 
 You can change the `DYNAMIC_BLOCK`, `BLOCK_SIZE`, and `MAX_EXPR_PER_BLOCK` to change the number of expressions the backend will send to the frontend per call (too much will cause a memory error, too little could kill the backend with too many requests). These only really matter if you are rendering a video.
+
+Use `python3 backend.py -h` to learn more about these variables and how to set them. Run without any command-line arguments to create a rendering with the same settings as seen in [this video](https://www.youtube.com/watch?v=BQvBq3K50u8).
 
 Run backend (This may take a while depending on the size and complexity of the frames). Should eventually show that the server is running on `localhost:5000`.
 ```sh

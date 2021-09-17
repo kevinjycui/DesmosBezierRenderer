@@ -11,6 +11,8 @@ import cv2
 import multiprocessing
 from time import time
 import os
+import sys
+import getopt
 
 
 app = Flask(__name__)
@@ -25,9 +27,25 @@ FRAME_DIR = 'frames' # The folder where the frames are stored relative to this f
 FILE_EXT = 'png' # Extension for frame files
 COLOUR = '#2464b4' # Hex value of colour for graph output	
 
-DOWNLOAD_IMAGES = True # Download each rendered frame automatically (works best in firefox)
-USE_L2_GRADIENT = True # Creates less edges but is still accurate (leads to faster renders)
-SHOW_GRID = False # Show the grid in the background while rendering
+DOWNLOAD_IMAGES = False # Download each rendered frame automatically (works best in firefox)
+USE_L2_GRADIENT = False # Creates less edges but is still accurate (leads to faster renders)
+SHOW_GRID = True # Show the grid in the background while rendering
+
+
+def help():
+    print('backend.py -f <source> -e <extension> -c <colour> -d -l -g --static --block=<block size> --maxpblock=<max expressions per block>\n')
+    print('\t-h\tGet help\n')
+    print('-Render options\n')
+    print('\t-f <source>\tThe directory from which the frames are stored (e.g. frames)')
+    print('\t-e <extension>\tThe extension of the frame files (e.g. png)')
+    print('\t-c <colour>\tThe colour of the lines to be drawn (e.g. #2464b4)')
+    print('\t-d\t\tDownload rendered frames automatically')
+    print('\t-l\t\tUse L2 gradient, creates less edges but is still accurate: leads to faster renders)')
+    print('\t-g\t\tHide the grid in the background of the graph\n')
+    print('-Optimisational options\n')
+    print('\t--static\t\t\t\t\tUse a static number of expressions per request block')
+    print('\t--block=<block size>\t\t\t\tThe number of frames per block in dynamic blocks')
+    print('\t--maxpblock=<maximum expressions per block>\tThe maximum number of expressions per block in static blocks')
 
 
 def get_contours(filename, nudge = .33):
@@ -81,6 +99,7 @@ def get_latex(filename):
             start = segment.end_point
     return latex
 
+
 def get_expressions(frame):
     exprid = 0
     exprs = []
@@ -89,7 +108,46 @@ def get_expressions(frame):
         exprs.append({'id': 'expr-' + str(exprid), 'latex': expr, 'color': COLOUR, 'secret': True})
     return exprs
 
+
 if __name__ == '__main__':
+
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hf:e:c:dlg", ['static', 'block=', 'maxpblock='])
+
+    except getopt.GetoptError:
+        print('Error: Invalid argument(s)\n')
+        help()
+        sys.exit(2)
+
+    try:
+        for opt, arg in opts:
+            if opt == '-h':
+                help()
+                sys.exit()
+            elif opt == '-f':
+                FRAME_DIR = arg
+            elif opt == '-e':
+                FILE_EXT = arg
+            elif opt == '-c':
+                COLOUR = arg
+            elif opt == '-d':
+                DOWNLOAD_IMAGES = True
+            elif opt == '-l':
+                USE_L2_GRADIENT = True
+            elif opt == '-g':
+                SHOW_GRID = False
+            elif opt == '--static':
+                DYNAMIC_BLOCK = False
+            elif opt == '--block':
+                BLOCK_SIZE = int(arg)
+            elif opt == '--maxpblock':
+                MAX_EXPR_PER_BLOCK = int(arg)
+
+    except TypeError:
+        print('Error: Invalid argument(s)\n')
+        help()
+        sys.exit(2)
+
     frame = multiprocessing.Value('i', 0)
     height = multiprocessing.Value('i', 0, lock = False)
     width = multiprocessing.Value('i', 0, lock = False)
@@ -111,6 +169,7 @@ if __name__ == '__main__':
 
 # with open('cache.json', 'w+') as f:
 #     json.dump(frame_latex, f)
+
 
 @app.route('/')
 def index():
@@ -136,8 +195,10 @@ def index():
             i += 1
     return json.dumps({'result': block, 'number_of_frames': number_of_frames}) # Number_of_frames is the number of newly loaded frames, not the total frames
 
+
 @app.route('/init')
 def init():
     return json.dumps({'height': height.value, 'width': width.value, 'total_frames': len(os.listdir(FRAME_DIR)), 'download_images': DOWNLOAD_IMAGES, 'show_grid': SHOW_GRID})
+
 
 app.run()
