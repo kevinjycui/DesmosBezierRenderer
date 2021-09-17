@@ -30,37 +30,54 @@ mkdir frames
 ...
 ```
 #### Settings
-Constants in the `backend.py` file can be changed to optimise or customise your render via command-line arguments. Note that a "block" refers to what is passed from the backend to the frontend per HTTP request.
-| Variable | Type | Description | Notes |
-| --- | --- | --- | --- |
-| `DYNAMIC_BLOCK` | Boolean | Automatically find the right block size | If unsure, leave as true
-| `BLOCK_SIZE` | Integer | Number of frames per block | Ignored if `DYNAMIC_BLOCK` is true |
-| `MAX_EXPR_PER_BLOCK` | Integer | Maximum lines per block, doesn't affect lines per frame | Ignored if `DYNAMIC_BLOCK` is false |
-| `FRAME_DIR` | String | The folder where the frames are stored relative to this file | `'frames'` |
-| `FILE_EXT` | String | Extension for frame files | `'png'`, `'jpg'`, etc. |
-| `COLOUR` | String | Hex value of colour for graph output | Desmos blue is `'#2464b4'` |
-| `DOWNLOAD_IMAGES` | Boolean | Download each rendered frame automatically (works best in Firefox) | If true, each frame is screenshotted automatically. Works best in Firefox, as chromium browsers will constantly prompt for downloads
-| `USE_L2_GRADIENT` | Boolean | Creates less edges but is still accurate (leads to faster renders) | |
-| `SHOW_GRID` | Boolean | Show the grid in the background while rendering | |
+Constants in the `backend.py` file can be changed to optimise or customise your render via command-line arguments.
 
-You can change the `DYNAMIC_BLOCK`, `BLOCK_SIZE`, and `MAX_EXPR_PER_BLOCK` to change the number of expressions the backend will send to the frontend per call (too much will cause a memory error, too little could kill the backend with too many requests). These only really matter if you are rendering a video.
+```sh
+$ python backend.py -h
+backend.py -f <source> -e <extension> -c <colour> -b -d -l -g --static --block=<block size> --maxpblock=<max expressions per block>
 
-Use `python3 backend.py -h` to learn more about these variables and how to set them. Run without any command-line arguments to create a rendering with the same settings as seen in [this video](https://www.youtube.com/watch?v=BQvBq3K50u8). To revert the code to be exactly as it was when the video was released, run `git checkout 47b10ea98b04b98ce46e54a46adde27bcb52e53e` first.
+	-h	Get help
 
-Run backend (This may take a while depending on the size and complexity of the frames). Should eventually show that the server is running on `localhost:5000`.
+-Render options
+
+	-f <source>	The directory from which the frames are stored (e.g. frames)
+	-e <extension>	The extension of the frame files (e.g. png)
+	-c <colour>	The colour of the lines to be drawn (e.g. #2464b4)
+	-b		Reduce number of lines with bilateral filter for simpler renders
+	-d		Download rendered frames automatically
+	-l		Reduce number of lines with L2 gradient for quicker renders
+	-g		Hide the grid in the background of the graph
+
+-Optimisational options
+
+	--static					Use a static number of expressions per request block
+	--block=<block size>				The number of frames per block in dynamic blocks
+	--maxpblock=<maximum expressions per block>	The maximum number of expressions per block in static blocks
+```
+
+You can use the optimisational options to change the number of expressions the backend will send to the frontend per call (too much will cause a memory error, too little could kill the backend with too many requests). Note that a "block" refers to what is passed from the backend to the frontend per HTTP request. These only really matter if you are rendering a video.
+
+Use `python3 backend.py -h` to see the above help message. Run without any command-line arguments to create a rendering with the same settings as seen in [this video](https://www.youtube.com/watch?v=BQvBq3K50u8). 
+
+To revert the code to be exactly as it was when the video was released, run `git checkout 47b10ea98b04b98ce46e54a46adde27bcb52e53e` first (this will cause the rendering to be significantly slower).
+
+#### Running the command
+
+Run backend (This may take a while depending on the size and complexity of the frames). It should eventually show that the server is running on `localhost:5000`.
 ```sh
 python3 backend.py
 ```
 
 The following is an example of the output
 ```sh
+$ python3 backend.py 
 Desmos Bezier Renderer
 Junferno 2021
 https://github.com/kevinjycui/DesmosBezierRenderer
 -----------------------------
 Processing 513 frames... Please wait for processing to finish before running on frontend
 
---> Processing complete in 7.4 seconds
+--> Processing complete in 4.4 seconds
 
  * Serving Flask app "backend" (lazy loading)
  * Environment: production
@@ -68,8 +85,7 @@ Processing 513 frames... Please wait for processing to finish before running on 
    Use a production WSGI server instead.
  * Debug mode: off
  * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
-127.0.0.1 - - [17/Sep/2021 01:28:46] "GET /init HTTP/1.1" 200 -
-127.0.0.1 - - [17/Sep/2021 01:28:50] "GET /?frame=0 HTTP/1.1" 200 -
+
 ```
 
 Load `index.html` into a web browser and put `f=1` into the first formula in the formula window. The image should start rendering or the video should start playing at a slow rate.

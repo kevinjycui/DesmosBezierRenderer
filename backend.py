@@ -27,20 +27,22 @@ FRAME_DIR = 'frames' # The folder where the frames are stored relative to this f
 FILE_EXT = 'png' # Extension for frame files
 COLOUR = '#2464b4' # Hex value of colour for graph output	
 
+BILATERAL_FILTER = False # Reduce number of lines with bilateral filter
 DOWNLOAD_IMAGES = False # Download each rendered frame automatically (works best in firefox)
 USE_L2_GRADIENT = False # Creates less edges but is still accurate (leads to faster renders)
 SHOW_GRID = True # Show the grid in the background while rendering
 
 
 def help():
-    print('backend.py -f <source> -e <extension> -c <colour> -d -l -g --static --block=<block size> --maxpblock=<max expressions per block>\n')
+    print('backend.py -f <source> -e <extension> -c <colour> -b -d -l -g --static --block=<block size> --maxpblock=<max expressions per block>\n')
     print('\t-h\tGet help\n')
     print('-Render options\n')
     print('\t-f <source>\tThe directory from which the frames are stored (e.g. frames)')
     print('\t-e <extension>\tThe extension of the frame files (e.g. png)')
     print('\t-c <colour>\tThe colour of the lines to be drawn (e.g. #2464b4)')
+    print('\t-b\t\tReduce number of lines with bilateral filter for simpler renders')
     print('\t-d\t\tDownload rendered frames automatically')
-    print('\t-l\t\tUse L2 gradient, creates less edges but is still accurate: leads to faster renders)')
+    print('\t-l\t\tReduce number of lines with L2 gradient for quicker renders')
     print('\t-g\t\tHide the grid in the background of the graph\n')
     print('-Optimisational options\n')
     print('\t--static\t\t\t\t\tUse a static number of expressions per request block')
@@ -52,11 +54,15 @@ def get_contours(filename, nudge = .33):
     image = cv2.imread(filename)
 
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    median = max(10, min(245, np.median(gray)))
-    lower = int(max(0, (1 - nudge) * median))
-    upper = int(min(255, (1 + nudge) * median))
-    filtered = cv2.bilateralFilter(gray, 5, 50, 50)
-    edged = cv2.Canny(filtered, lower, upper, L2gradient = USE_L2_GRADIENT)
+
+    if BILATERAL_FILTER:
+        median = max(10, min(245, np.median(gray)))
+        lower = int(max(0, (1 - nudge) * median))
+        upper = int(min(255, (1 + nudge) * median))
+        filtered = cv2.bilateralFilter(gray, 5, 50, 50)
+        edged = cv2.Canny(filtered, lower, upper, L2gradient = USE_L2_GRADIENT)
+    else:
+        edged = cv2.Canny(gray, 30, 200)
 
     with frame.get_lock():
         frame.value += 1
@@ -112,7 +118,7 @@ def get_expressions(frame):
 if __name__ == '__main__':
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hf:e:c:dlg", ['static', 'block=', 'maxpblock='])
+        opts, args = getopt.getopt(sys.argv[1:], "hf:e:c:bdlg", ['static', 'block=', 'maxpblock='])
 
     except getopt.GetoptError:
         print('Error: Invalid argument(s)\n')
@@ -130,6 +136,8 @@ if __name__ == '__main__':
                 FILE_EXT = arg
             elif opt == '-c':
                 COLOUR = arg
+            elif opt == '-b':
+                BILATERAL_FILTER = True
             elif opt == '-d':
                 DOWNLOAD_IMAGES = True
             elif opt == '-l':
