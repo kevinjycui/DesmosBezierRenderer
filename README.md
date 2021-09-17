@@ -45,7 +45,7 @@ Constants in the `backend.py` file can be changed to optimise or customise your 
 
 You can change the `DYNAMIC_BLOCK`, `BLOCK_SIZE`, and `MAX_EXPR_PER_BLOCK` to change the number of expressions the backend will send to the frontend per call (too much will cause a memory error, too little could kill the backend with too many requests). These only really matter if you are rendering a video.
 
-Use `python3 backend.py -h` to learn more about these variables and how to set them. Run without any command-line arguments to create a rendering with the same settings as seen in [this video](https://www.youtube.com/watch?v=BQvBq3K50u8).
+Use `python3 backend.py -h` to learn more about these variables and how to set them. Run without any command-line arguments to create a rendering with the same settings as seen in [this video](https://www.youtube.com/watch?v=BQvBq3K50u8). To revert the code to be exactly as it was when the video was released, run `git checkout 47b10ea98b04b98ce46e54a46adde27bcb52e53e` first.
 
 Run backend (This may take a while depending on the size and complexity of the frames). Should eventually show that the server is running on `localhost:5000`.
 ```sh
@@ -73,3 +73,9 @@ Processing 513 frames... Please wait for processing to finish before running on 
 ```
 
 Load `index.html` into a web browser and put `f=1` into the first formula in the formula window. The image should start rendering or the video should start playing at a slow rate.
+
+![](github/final.png)
+
+## Attribution
+
+©Copyright Junferno 2021. This program is licensed under the GNU General Public License. Please provide proper credit to the author (Junferno) in any public media that uses this software.
