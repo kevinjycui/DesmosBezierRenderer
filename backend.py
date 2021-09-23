@@ -171,7 +171,15 @@ if __name__ == '__main__':
         print('Processing %d frames... Please wait for processing to finish before running on frontend\n' % len(os.listdir(FRAME_DIR)))
 
         start = time()
-        frame_latex = pool.map(get_expressions, frame_latex)
+
+        try:
+            frame_latex = pool.map(get_expressions, frame_latex)
+        except cv2.error as e:
+            if str(e) == 'OpenCV(4.5.1) /tmp/pip-req-build-ms668fyv/opencv/modules/imgproc/src/color.cpp:182: error: (-215:Assertion failed) !_src.empty() in function \'cvtColor\'\n':
+                print('Unable to get one or more files. Remember image files should be named <DIRECTORY>/frame<INDEX>.<EXTENSION> where INDEX represents the frame number starting from 1 and DIRECTORY and EXTENSION are defined by command line arguments (e.g. frames/frame1.png). Please check if:\n\tThe files exist\n\tThe files are all valid image files\n\tThe name of the files given is correct as per command line arguments\n\tThe program has the necessary permissions to read the file.\n\nUse backend.py -h for further documentation\n')
+            else:
+                print(e)
+            sys.exit(2)
 
         print('\r--> Processing complete in %.1f seconds\n' % (time() - start))
 
