@@ -116,6 +116,36 @@ def get_expressions(frame):
     return exprs
 
 
+@app.route('/')
+def index():
+    frame = int(request.args.get('frame'))
+    if frame >= len(os.listdir(FRAME_DIR)):
+        return {'result': None}
+
+    block = []
+    if not DYNAMIC_BLOCK:
+        number_of_frames = min(frame + BLOCK_SIZE, len(os.listdir(FRAME_DIR))) - frame
+        for i in range(frame, frame + number_of_frames):
+            block.append(frame_latex[i])
+    else:
+        number_of_frames = 0
+        total = 0
+        i = frame
+        while total < MAX_EXPR_PER_BLOCK:
+            if i >= len(frame_latex):
+                break
+            number_of_frames += 1
+            total += len(frame_latex[i])
+            block.append(frame_latex[i])
+            i += 1
+    return json.dumps({'result': block, 'number_of_frames': number_of_frames}) # Number_of_frames is the number of newly loaded frames, not the total frames
+
+
+@app.route('/init')
+def init():
+    return json.dumps({'height': height.value, 'width': width.value, 'total_frames': len(os.listdir(FRAME_DIR)), 'download_images': DOWNLOAD_IMAGES, 'show_grid': SHOW_GRID})
+
+
 if __name__ == '__main__':
 
     try:
@@ -186,38 +216,7 @@ if __name__ == '__main__':
 
         print('\r--> Processing complete in %.1f seconds\n' % (time() - start))
 
-# with open('cache.json', 'w+') as f:
-#     json.dump(frame_latex, f)
+        # with open('cache.json', 'w+') as f:
+        #     json.dump(frame_latex, f)
 
-
-@app.route('/')
-def index():
-    frame = int(request.args.get('frame'))
-    if frame >= len(os.listdir(FRAME_DIR)):
-        return {'result': None}
-
-    block = []
-    if not DYNAMIC_BLOCK:
-        number_of_frames = min(frame + BLOCK_SIZE, len(os.listdir(FRAME_DIR))) - frame
-        for i in range(frame, frame + number_of_frames):
-            block.append(frame_latex[i])
-    else:
-        number_of_frames = 0
-        total = 0
-        i = frame
-        while total < MAX_EXPR_PER_BLOCK:
-            if i >= len(frame_latex):
-                break
-            number_of_frames += 1
-            total += len(frame_latex[i])
-            block.append(frame_latex[i])
-            i += 1
-    return json.dumps({'result': block, 'number_of_frames': number_of_frames}) # Number_of_frames is the number of newly loaded frames, not the total frames
-
-
-@app.route('/init')
-def init():
-    return json.dumps({'height': height.value, 'width': width.value, 'total_frames': len(os.listdir(FRAME_DIR)), 'download_images': DOWNLOAD_IMAGES, 'show_grid': SHOW_GRID})
-
-
-app.run()
+        app.run()
