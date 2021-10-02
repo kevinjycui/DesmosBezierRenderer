@@ -33,6 +33,11 @@ DOWNLOAD_IMAGES = False # Download each rendered frame automatically (works best
 USE_L2_GRADIENT = False # Creates less edges but is still accurate (leads to faster renders)
 SHOW_GRID = True # Show the grid in the background while rendering
 
+frame = multiprocessing.Value('i', 0)
+height = multiprocessing.Value('i', 0, lock = False)
+width = multiprocessing.Value('i', 0, lock = False)
+frame_latex =  range(len(os.listdir(FRAME_DIR)))
+
 
 def help():
     print('backend.py -f <source> -e <extension> -c <colour> -b -d -l -g --static --block=<block size> --maxpblock=<max expressions per block>\n')
@@ -186,11 +191,6 @@ if __name__ == '__main__':
         print('Error: Invalid argument(s)\n')
         help()
         sys.exit(2)
-
-    frame = multiprocessing.Value('i', 0)
-    height = multiprocessing.Value('i', 0, lock = False)
-    width = multiprocessing.Value('i', 0, lock = False)
-    frame_latex =  range(len(os.listdir(FRAME_DIR)))
 
     with multiprocessing.Pool(processes = multiprocessing.cpu_count()) as pool:
         print('Desmos Bezier Renderer')
