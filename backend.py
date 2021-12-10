@@ -36,7 +36,7 @@ SHOW_GRID = True # Show the grid in the background while rendering
 frame = multiprocessing.Value('i', 0)
 height = multiprocessing.Value('i', 0, lock = False)
 width = multiprocessing.Value('i', 0, lock = False)
-frame_latex =  range(len(os.listdir(FRAME_DIR)))
+frame_latex = 0
 
 
 def help():
@@ -186,6 +186,7 @@ if __name__ == '__main__':
                 BLOCK_SIZE = int(arg)
             elif opt == '--maxpblock':
                 MAX_EXPR_PER_BLOCK = int(arg)
+        frame_latex =  range(len(os.listdir(FRAME_DIR)))
 
     except TypeError:
         print('Error: Invalid argument(s)\n')
