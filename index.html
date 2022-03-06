@@ -18,7 +18,7 @@
             for (var expr of latex) {
                 console.log(expr);
                 key++;
-                calculator.setExpression({ id: 'expr-' + key, latex: expr.latex, color: '#2464b4' });
+                calculator.setExpression({ id: 'expr-' + key, latex: expr.latex, color: expr.color });
             }
             return key;
         }

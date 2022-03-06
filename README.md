@@ -44,9 +44,9 @@ backend.py -f <source> -e <extension> -c <colour> -b -d -l -g --static --block=<
 	-e <extension>	The extension of the frame files (e.g. png)
 	-c <colour>	The colour of the lines to be drawn (e.g. #2464b4)
 	-b		Reduce number of lines with bilateral filter for simpler renders
-	-d		Download rendered frames automatically
+	-d		Download rendered frames automatically (only available if rendering quick.html)
 	-l		Reduce number of lines with L2 gradient for quicker renders
-	-g		Hide the grid in the background of the graph
+	-g		Hide the grid in the background of the graph (only available if rendering quick.html)
 
 -Optimisational options
 
@@ -58,8 +58,6 @@ backend.py -f <source> -e <extension> -c <colour> -b -d -l -g --static --block=<
 You can use the optimisational options to change the number of expressions the backend will send to the frontend per call (too much will cause a memory error, too little could kill the backend with too many requests). Note that a "block" refers to what is passed from the backend to the frontend per HTTP request. These only really matter if you are rendering a video.
 
 Use `python3 backend.py -h` to see the above help message. Run without any command-line arguments to create a rendering with the same settings as seen in [this video](https://www.youtube.com/watch?v=BQvBq3K50u8). 
-
-To revert the code to be exactly as it was when the video was released, run `git checkout 47b10ea98b04b98ce46e54a46adde27bcb52e53e` first (this will cause the rendering to be significantly slower).
 
 #### Running the command
 
@@ -88,7 +86,9 @@ Processing 513 frames... Please wait for processing to finish before running on 
 
 ```
 
-Load `index.html` into a web browser and put `f=1` into the first formula in the formula window. The image should start rendering or the video should start playing at a slow rate.
+Load `index.html` into a web browser and put `f=1` into the first formula in the formula window. The image should start rendering or the video should start playing at a slow rate. 
+
+Alternatively, you can load `quick.html` for a quicker rendering that also allows for the use of the automatic download (`-d`) and gridline removal (`-g`) options. This however will lower the quality, cause frames to disappear immediately after rendering, and will not show equations in the left sidebar. The renders seen in the video [this video](https://www.youtube.com/watch?v=BQvBq3K50u8) use `index.html` whereas [this video](https://www.youtube.com/watch?v=c38ob_YC0IA) uses `quick.html`.
 
 ![](github/final.png)
 
