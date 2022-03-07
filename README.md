@@ -88,7 +88,7 @@ Processing 513 frames... Please wait for processing to finish before running on 
 
 Load `index.html` into a web browser and put `f=1` into the first formula in the formula window. The image should start rendering or the video should start playing at a slow rate. 
 
-Alternatively, you can load `quick.html` for a quicker rendering that also allows for the use of the automatic download (`-d`) and gridline removal (`-g`) options. This however will lower the quality, cause frames to disappear immediately after rendering, and will not show equations in the left sidebar. The renders seen in the video [this video](https://www.youtube.com/watch?v=BQvBq3K50u8) use `index.html` whereas [this video](https://www.youtube.com/watch?v=c38ob_YC0IA) uses `quick.html`.
+Alternatively, you can load `quick.html` for a **quicker rendering** with **more consistent rendering time per frame** that also allows for the use of the automatic download (`-d`) and gridline removal (`-g`) options. This however will also lower the quality, cause frames to disappear immediately after rendering, and will not show equations in the left sidebar. The renders seen in the video [this video](https://www.youtube.com/watch?v=BQvBq3K50u8) use `index.html` whereas [this video](https://www.youtube.com/watch?v=c38ob_YC0IA) uses `quick.html`.
 
 ![](github/final.png)
 
