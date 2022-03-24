@@ -19,19 +19,21 @@ import traceback
 app = Flask(__name__)
 CORS(app)
 
+with open('config.json', 'r') as f:
+    config = json.load(f)
 
-DYNAMIC_BLOCK = True # Automatically find the right block size
-BLOCK_SIZE = 25 # Number of frames per block (ignored if DYNAMIC_BLOCK is true)
-MAX_EXPR_PER_BLOCK = 7500 # Maximum lines per block, doesn't affect lines per frame (ignored if DYNAMIC_BLOCK is false)
+DYNAMIC_BLOCK = config["dynamic_block"] # Automatically find the right block size
+BLOCK_SIZE = config["block_size"] # Number of frames per block (ignored if DYNAMIC_BLOCK is true)
+MAX_EXPR_PER_BLOCK = config["max_expr_per_block"] # Maximum lines per block, doesn't affect lines per frame (ignored if DYNAMIC_BLOCK is false)
 
-FRAME_DIR = 'frames' # The folder where the frames are stored relative to this file
-FILE_EXT = 'png' # Extension for frame files
-COLOUR = '#2464b4' # Hex value of colour for graph output	
+FRAME_DIR = config["frame_dir"] # The folder where the frames are stored relative to this file
+FILE_EXT = config["file_ext"] # Extension for frame files
+COLOUR = config["colour"] # Hex value of colour for graph output	
 
-BILATERAL_FILTER = False # Reduce number of lines with bilateral filter
-DOWNLOAD_IMAGES = False # Download each rendered frame automatically (works best in firefox)
-USE_L2_GRADIENT = False # Creates less edges but is still accurate (leads to faster renders)
-SHOW_GRID = True # Show the grid in the background while rendering
+BILATERAL_FILTER = config["bilateral_filter"] # Reduce number of lines with bilateral filter
+DOWNLOAD_IMAGES = config["download_images"] # Download each rendered frame automatically (works best in firefox)
+USE_L2_GRADIENT = config["use_l2_gradient"] # Creates less edges but is still accurate (leads to faster renders)
+SHOW_GRID = config["show_grid"] # Show the grid in the background while rendering
 
 frame = multiprocessing.Value('i', 0)
 height = multiprocessing.Value('i', 0, lock = False)

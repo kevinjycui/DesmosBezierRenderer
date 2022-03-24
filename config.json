@@ -1,0 +1,14 @@
+{
+    "dynamic_block": true,
+    "block_size": 25,
+    "max_expr_per_block": 7500,
+
+    "frame_dir": "frames",
+    "file_ext": "png",
+    "colour": "#2464b4",
+
+    "bilateral_filter": false,
+    "download_images": false,
+    "use_l2_gradient": false,
+    "show_grid": true
+}
