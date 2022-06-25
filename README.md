@@ -8,8 +8,8 @@ A simple image/video to Desmos graph converter run locally. Rotoscopes images us
 #### This guide won't work out of the box on Windows. The easiest way to do this on Windows is to [download WSL](https://www.microsoft.com/store/productId/9N6SVWS3RX71) to run all the commands below. You can find it produces under the `\\wsl$\Ubuntu-20.04\home` path on your PC.
 Install dependencies
 ```sh
-apt update
-apt install git python3-dev python3-pip build-essential libagg-dev libpotrace-dev pkg-config
+sudo apt update
+sudo apt install git python3-dev python3-pip build-essential libagg-dev libpotrace-dev pkg-config
 ```
 
 Clone repository
