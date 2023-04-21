@@ -5,7 +5,7 @@ A simple image/video to Desmos graph converter run locally. Rotoscopes images us
 ![](github/figures.png)
 
 ## Setup
-#### This guide won't work out of the box on Windows. The easiest way to do this on Windows is to [download WSL](https://www.microsoft.com/store/productId/9N6SVWS3RX71) to run all the commands below. You can find it produces under the `\\wsl$\Ubuntu-20.04\home` path on your PC.
+#### This guide won't work out of the box on Windows. The easiest way to do this on Windows is to [install WSL](https://learn.microsoft.com/en-us/windows/wsl/install) to run all the commands below. You can find it produces under the `\\wsl$\Ubuntu-20.04\home` path on your PC.
 Install dependencies
 ```sh
 sudo apt update
@@ -20,9 +20,10 @@ cd DesmosBezierRenderer
 
 Install requirements
 ```sh
-python3 -m venv env
+python -m venv env
 . env/bin/activate
-pip3 install -r requirements.txt
+pip install wheel
+pip install -r requirements.txt
 ```
 Replace the images in the `frames` directory with your own and name each image `frame%d.png` where `%d` represents the frame-number starting from 1. To render just a single image, add a single image named `frame1.png` in the directory. Works best with 360p to 480p resolution (may have to lower the resolution further with more complex frames).
 ```sh
@@ -57,21 +58,36 @@ backend.py -f <source> -e <extension> -c <colour> -b -d -l -g --static --block=<
 
 You can use the optimisational options to change the number of expressions the backend will send to the frontend per call (too much will cause a memory error, too little could kill the backend with too many requests). Note that a "block" refers to what is passed from the backend to the frontend per HTTP request. These only really matter if you are rendering a video.
 
-Use `python3 backend.py -h` to see the above help message. Run without any command-line arguments to create a rendering with the same settings as seen in [this video](https://www.youtube.com/watch?v=BQvBq3K50u8). 
+Use `python backend.py -h` to see the above help message. Run without any command-line arguments to create a rendering with the same settings as seen in [this video](https://www.youtube.com/watch?v=BQvBq3K50u8). 
 
 #### Running the command
 
 Run backend (This may take a while depending on the size and complexity of the frames). It should eventually show that the server is running on `localhost:5000`.
 ```sh
-python3 backend.py
+python backend.py
 ```
 
 The following is an example of the output
 ```sh
-$ python3 backend.py 
-Desmos Bezier Renderer
+$ python backend.py 
+  _____                                
+ |  __ \                               
+ | |  | | ___  ___ _ __ ___   ___  ___ 
+ | |  | |/ _ \/ __| '_ ` _ \ / _ \/ __|
+ | |__| |  __/\__ \ | | | | | (_) \__ \
+ |_____/ \___||___/_| |_| |_|\___/|___/
+
+                   BEZIER RENDERER
 Junferno 2021
 https://github.com/kevinjycui/DesmosBezierRenderer
+
+ = COPYRIGHT =
+©Copyright Junferno 2021-2023. This program is licensed under the [GNU General Public License](https://github.com/kevinjycui/DesmosBezierRenderer/blob/master/LICENSE). Please provide proper credit to the author (Junferno) in any public media that uses this software. Desmos Bezier Renderer is in no way, shape, or form endorsed by or associated with Desmos, Inc.
+
+ = EULA =
+By using Desmos Bezier Renderer, you agree to comply to the [Desmos Terms of Service](https://www.desmos.com/terms). The Software and related documentation are provided “AS IS” and without any warranty of any kind. Desmos Bezier Renderer is not responsible for any User application or modification that constitutes a breach in terms. User acknowledges and agrees that the use of the Software is at the User's sole risk. The developer kindly asks Users to not use Desmos Bezier Renderer to enter into Desmos Math Art competitions, for the purpose of maintaining fairness and integrity.
+
+                                      Agree (y/n)? y
 -----------------------------
 Processing 513 frames... Please wait for processing to finish before running on frontend
 
@@ -92,6 +108,11 @@ Alternatively, you can load `quick.html` for a **quicker rendering** with **more
 
 ![](github/final.png)
 
-## Attribution
+## Copyright
 
-©Copyright Junferno 2021. This program is licensed under the GNU General Public License. Please provide proper credit to the author (Junferno) in any public media that uses this software.
+©Copyright Junferno 2021-2023. This program is licensed under the [GNU General Public License](https://github.com/kevinjycui/DesmosBezierRenderer/blob/master/LICENSE). Please provide proper credit to the author (Junferno) in any public media that uses this software. Desmos Bezier Renderer is in no way, shape, or form endorsed by or associated with Desmos, Inc.
+
+## EULA
+```
+By using Desmos Bezier Renderer, you agree to comply to the [Desmos Terms of Service](https://www.desmos.com/terms). The Software and related documentation are provided “AS IS” and without any warranty of any kind. Desmos Bezier Renderer is not responsible for any User application or modification that constitutes a breach in terms. User acknowledges and agrees that the use of the Software is at the User's sole risk. The developer kindly asks Users to not use Desmos Bezier Renderer to enter into Desmos Math Art competitions, for the purpose of maintaining fairness and integrity.
+```

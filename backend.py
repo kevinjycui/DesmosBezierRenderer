@@ -194,9 +194,31 @@ if __name__ == '__main__':
         sys.exit(2)
 
     with multiprocessing.Pool(processes = multiprocessing.cpu_count()) as pool:
-        print('Desmos Bezier Renderer')
+        print('''  _____                                
+ |  __ \                               
+ | |  | | ___  ___ _ __ ___   ___  ___ 
+ | |  | |/ _ \/ __| '_ ` _ \ / _ \/ __|
+ | |__| |  __/\__ \ | | | | | (_) \__ \\
+ |_____/ \___||___/_| |_| |_|\___/|___/
+''')
+        print('                   BEZIER RENDERER')
         print('Junferno 2021')
         print('https://github.com/kevinjycui/DesmosBezierRenderer')
+
+        print('''
+ = COPYRIGHT =
+©Copyright Junferno 2021-2023. This program is licensed under the [GNU General Public License](https://github.com/kevinjycui/DesmosBezierRenderer/blob/master/LICENSE). Please provide proper credit to the author (Junferno) in any public media that uses this software. Desmos Bezier Renderer is in no way, shape, or form endorsed by or associated with Desmos, Inc.
+
+ = EULA =
+By using Desmos Bezier Renderer, you agree to comply to the [Desmos Terms of Service](https://www.desmos.com/terms). The Software and related documentation are provided “AS IS” and without any warranty of any kind. Desmos Bezier Renderer is not responsible for any User application or modification that constitutes a breach in terms. User acknowledges and agrees that the use of the Software is at the User's sole risk. The developer kindly asks Users to not use Desmos Bezier Renderer to enter into Desmos Math Art competitions, for the purpose of maintaining fairness and integrity.
+''')
+
+        eula = ''
+
+        while eula != 'y':
+            eula = input('                                      Agree (y/n)? ')
+            if eula == 'n':
+                quit()
 
         print('-----------------------------')
 
