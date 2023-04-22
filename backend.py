@@ -53,7 +53,9 @@ def help():
     print('-Optimisational options\n')
     print('\t--static\t\t\t\t\tUse a static number of expressions per request block')
     print('\t--block=<block size>\t\t\t\tThe number of frames per block in dynamic blocks')
-    print('\t--maxpblock=<maximum expressions per block>\tThe maximum number of expressions per block in static blocks')
+    print('\t--maxpblock=<maximum expressions per block>\tThe maximum number of expressions per block in static blocks\n')
+    print('-Miscellaneous\n')
+    print('\t--yes\tAgree to EULA without input prompt')
 
 
 def get_contours(filename, nudge = .33):
@@ -154,12 +156,14 @@ def init():
 if __name__ == '__main__':
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hf:e:c:bdlg", ['static', 'block=', 'maxpblock='])
+        opts, args = getopt.getopt(sys.argv[1:], "hf:e:c:bdlg", ['static', 'block=', 'maxpblock=', 'yes'])
 
     except getopt.GetoptError:
         print('Error: Invalid argument(s)\n')
         help()
         sys.exit(2)
+
+    eula = ''
 
     try:
         for opt, arg in opts:
@@ -186,6 +190,8 @@ if __name__ == '__main__':
                 BLOCK_SIZE = int(arg)
             elif opt == '--maxpblock':
                 MAX_EXPR_PER_BLOCK = int(arg)
+            elif opt == '--yes':
+                eula = 'y'
         frame_latex =  range(len(os.listdir(FRAME_DIR)))
 
     except TypeError:
@@ -212,8 +218,6 @@ if __name__ == '__main__':
  = EULA =
 By using Desmos Bezier Renderer, you agree to comply to the [Desmos Terms of Service](https://www.desmos.com/terms). The Software and related documentation are provided “AS IS” and without any warranty of any kind. Desmos Bezier Renderer is not responsible for any User application or modification that constitutes a breach in terms. User acknowledges and agrees that the use of the Software is at the User's sole risk. The developer kindly asks Users to not use Desmos Bezier Renderer to enter into Desmos Math Art competitions, for the purpose of maintaining fairness and integrity.
 ''')
-
-        eula = ''
 
         while eula != 'y':
             eula = input('                                      Agree (y/n)? ')

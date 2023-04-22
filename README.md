@@ -54,6 +54,10 @@ backend.py -f <source> -e <extension> -c <colour> -b -d -l -g --static --block=<
 	--static					Use a static number of expressions per request block
 	--block=<block size>				The number of frames per block in dynamic blocks
 	--maxpblock=<maximum expressions per block>	The maximum number of expressions per block in static blocks
+
+-Miscellaneous
+
+	--yes	Agree to EULA without input prompt
 ```
 
 You can use the optimisational options to change the number of expressions the backend will send to the frontend per call (too much will cause a memory error, too little could kill the backend with too many requests). Note that a "block" refers to what is passed from the backend to the frontend per HTTP request. These only really matter if you are rendering a video.
