@@ -38,7 +38,10 @@
 
             calculator.setState( hiddenGraph, {'allowUndo': false} );
             hiddenGraph.expressions.list = default_expressions;
-            await sleep(5000);
+
+            if (latex.length < 3000) {
+                await sleep(5000);
+            }
         }
 
         xhr = new XMLHttpRequest();
@@ -133,8 +136,24 @@
                         targetPixelRatio: 1
                     }
                     
+                    function finishRender() {
+                        return new Promise(resolve => {
+                             // Waits for frame to render, takes a screenshot and runs handleScreenshot
+                            calculator.asyncScreenshot(params, screenshot => {
+                                handleScreenshot(screenshot, frame +1);
+                                resolve('render has finished');
+                            });
+                        });
+                    }
+
+                    await finishRender();
+
+                    // this delay happens after the frame is rendered
+                    if (response.length > 3000) { // a cooldown because this is a big file
+                        await sleep(5000);
+                    }
+
                     frame++;
-                    calculator.asyncScreenshot(params, screenshot => handleScreenshot(screenshot, frame)); // Waits for frame to render, takes a screenshot and runs handleScreenshot
                     response = await requestData(frame);
                 }
             }
@@ -153,7 +172,7 @@
 
             // Reloading the page every so often seems to reduce random slowdowns
             if (frame % 20 === 0) { // run every 20 frames
-                sessionStorage.setItem('lastFrame', frame +1);
+                sessionStorage.setItem('lastFrame', frame);
                 sessionStorage.setItem('viewport', JSON.stringify(calculator.getState().graph.viewport));
                 location.reload();
             }

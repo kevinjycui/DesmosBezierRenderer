@@ -30,7 +30,10 @@
 
             calculator.setState( hiddenGraph, {'allowUndo': false} );
             hiddenGraph.expressions.list = default_expressions;
-            await sleep(5000);
+
+            if (latex.length < 3000) {
+                await sleep(5000);
+            }
         }
 
         xhr = new XMLHttpRequest();
@@ -105,6 +108,20 @@
                     // console.log('Lines for frame ' + (frame + 1) + ': ' + response.length);
 
                     await changeGraph(response);
+
+                    function finishRender() {
+                        return new Promise(resolve => {
+                            calculator.asyncScreenshot(screenshot => {
+                                resolve('render has finished');
+                            });
+                        });
+                    }
+
+                    await finishRender();
+
+                    if (response.length > 3000) { // a cooldown because this is a big file
+                        await sleep(5000);
+                    }
                     
                     frame++;
                     response = await requestData(frame);
