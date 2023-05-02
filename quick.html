@@ -149,7 +149,7 @@
                     await finishRender();
 
                     // this delay happens after the frame is rendered
-                    if (response.length > 3000) { // a cooldown because this is a big file
+                    if (response.length >= 3000) { // a cooldown because this is a big file
                         await sleep(5000);
                     }
 
