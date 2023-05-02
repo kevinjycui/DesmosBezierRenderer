@@ -129,6 +129,7 @@ def index():
     if frame >= len(os.listdir(FRAME_DIR)):
         return {'result': None}
 
+    """
     block = []
     if not DYNAMIC_BLOCK:
         number_of_frames = min(frame + BLOCK_SIZE, len(os.listdir(FRAME_DIR))) - frame
@@ -146,6 +147,8 @@ def index():
             block.append(frame_latex[i])
             i += 1
     return json.dumps({'result': block, 'number_of_frames': number_of_frames}) # Number_of_frames is the number of newly loaded frames, not the total frames
+    """
+    return json.dumps({'result': frame_latex[frame] })
 
 
 @app.route('/init')

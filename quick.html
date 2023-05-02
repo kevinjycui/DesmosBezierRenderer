@@ -11,11 +11,35 @@
 
         var inner = elt.getElementsByClassName('dcg-graph-outer')[0]; // The part of the screen with a visible grid
         var defaultState;
+        var hiddenGraph;
         var latex;
         var height;
         var width;
         var download_images;
         var total_frames;
+
+        function sleep(milliseconds) {
+            return new Promise(r => setTimeout(r, milliseconds));
+        }
+
+        async function changeGraph(latex) {
+            //console.log(latex);
+
+            var default_expressions = hiddenGraph.expressions.list.slice();
+
+            for (var expr of latex) {
+                hiddenGraph.expressions.list.push({
+                    color: expr.color,
+                    id: expr.id,
+                    latex: expr.latex,
+                    type: "expression"
+                })
+            }
+
+            calculator.setState( hiddenGraph, {'allowUndo': false} );
+            hiddenGraph.expressions.list = default_expressions;
+            await sleep(5000);
+        }
 
         xhr = new XMLHttpRequest();
         const interval = setInterval(() => { // Attempt backend connection
@@ -34,8 +58,25 @@
             var lastFrame = parseInt(sessionStorage.getItem('lastFrame')) || 0; // Get frame from page refresh
             sessionStorage.removeItem('lastFrame');
 
+            calculator.updateSettings({
+                showGrid: latex.show_grid,
+                showXAxis: latex.show_grid,
+                showYAxis: latex.show_grid
+            });
+
+            calculator.setMathBounds({
+                left: 0,
+                right: width,
+                bottom: 0,
+                top: height
+            });
+
             calculator.setExpression({ id: 'frame', latex: `f=${lastFrame}`, color: '#2464b4', sliderBounds: { step: 1, max: total_frames, min: 0 } });
             calculator.setExpression({ id: 'lines', latex: 'l=0', color: '#2464b4' });
+
+            // This is used to set expressions off screen
+            hiddenGraph = calculator.getState();
+            
             if (lastFrame != 0) { // This is a refresh
                 const viewport = JSON.parse(sessionStorage.getItem('viewport'));
                 sessionStorage.removeItem('viewport');
@@ -53,33 +94,36 @@
             defaultState.graph.showGrid = defaultState.graph.showXAxis = defaultState.graph.showYAxis = latex.show_grid;
         }
 
-        var loaded_frames = 0; // All frames loaded from backend so far
-        var old_frames = 0; // Frames rendered prior to last backend request
-        function renderFrame(frame) {
-            if (frame >= total_frames) return; // Animation finished
-            if (loaded_frames == 0) { // Load a batch of frames
-                xhr = new XMLHttpRequest();
-                xhr.open('GET', `http://127.0.0.1:5000/?frame=${frame}`);
-                xhr.send();
-                xhr.onload = () => {
-                    latex = JSON.parse(xhr.response);
-                    if (latex.result === null) return;
-                    loaded_frames = frame + latex.number_of_frames;
-                    old_frames = frame;
-                    renderFrame(frame);
-                }
-            } else { // Render the next frame
-                const viewport = calculator.getState().graph.viewport;
-                var start = Date.now();
-                calculator.setState(defaultState);
-                calculator.setExpression( { id: 'frame', latex: 'f=' + (frame + 1) } );
-                calculator.setExpression( { id: 'lines', latex: 'l=' + latex.result[frame - old_frames].length});
-                console.log('Lines for frame ' + (frame + 1) + ': ' + latex.result[frame - old_frames].length);
-                calculator.setViewport([viewport.xmin, viewport.xmax, viewport.ymin, viewport.ymax]); // setState resets the viewport, set it back to what it was
-                console.log('adding ' + (Date.now() - start) / 1000);
-                setTimeout(() => {
-                    calculator.setExpressions(latex.result[frame - old_frames]);
-                    console.log('drawing ' + (Date.now() - start) / 1000);
+        async function renderFrame(frame) {
+            
+            const requestData = (frame) => {
+            
+                return new Promise((resolve, reject) => {
+
+                    xhr = new XMLHttpRequest();
+                    xhr.open('GET', `http://127.0.0.1:5000/?frame=${frame}`);
+                    xhr.send();
+                    xhr.onload = () => {
+                        latex = JSON.parse(xhr.response);
+
+                        if (latex.result === null){
+                            reject(`frame: ${frame} could not be rendered.`);
+                        } else {
+                            resolve(latex.result);
+                        }
+                    }
+                });
+            }
+
+            try { // Render each frame
+                var response = await requestData(frame);
+                while (response) {
+                    hiddenGraph.expressions.list[0].latex = "f=" + (frame + 1);
+                    hiddenGraph.expressions.list[1].latex = "l=" + response.length;
+
+                    // console.log('Lines for frame ' + (frame + 1) + ': ' + response.length);
+
+                    await changeGraph(response);
 
                     const params = {
                         mode: 'stretch',
@@ -88,26 +132,31 @@
                         height: height,
                         targetPixelRatio: 1
                     }
-                    calculator.asyncScreenshot(params, screenshot => handleScreenshot(screenshot, start, ++frame)); // Waits for frame to render, takes a screenshot and runs handleScreenshot
-                }, 100); // Slight delay to allow the list to update
+                    
+                    frame++;
+                    calculator.asyncScreenshot(params, screenshot => handleScreenshot(screenshot, frame)); // Waits for frame to render, takes a screenshot and runs handleScreenshot
+                    response = await requestData(frame);
+                }
+            }
+            catch (err) {
+                console.log(err);
             }
         }
 
         const imgcont = document.createElement('a');
         document.body.appendChild(imgcont);
-        async function handleScreenshot(screenshot, start, frame) {
-            console.log('done ' + (Date.now() - start) / 1000);
+        async function handleScreenshot(screenshot, frame) {
             imgcont.href = screenshot;
             imgcont.download = 'frame-' + String(frame).padStart(5, '0');
             imgcont.innerHTML = `<img src= ${screenshot}>`;
             if (download_images) imgcont.click();
 
             // Reloading the page every so often seems to reduce random slowdowns
-            if (frame >= loaded_frames) {
-                sessionStorage.setItem('lastFrame', frame);
+            if (frame % 20 === 0) { // run every 20 frames
+                sessionStorage.setItem('lastFrame', frame +1);
                 sessionStorage.setItem('viewport', JSON.stringify(calculator.getState().graph.viewport));
                 location.reload();
-            } else renderFrame(frame);
+            }
         }
    </script>
 </html>
