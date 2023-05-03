@@ -25,7 +25,7 @@ python -m venv env
 pip install wheel
 pip install -r requirements.txt
 ```
-Replace the images in the `frames` directory with your own and name each image `frame%d.png` where `%d` represents the frame-number starting from 1. To render just a single image, add a single image named `frame1.png` in the directory. Works best with 360p to 480p resolution (may have to lower the resolution further with more complex frames).
+Replace the images in the `frames` directory with your own and name each image `frame%d.png` where `%d` represents the frame-number starting from 1. To render just a single image, add a single image named `frame1.png` in the directory. The renderer will work best with 360p to 480p resolution images (you may have to lower the resolution further with more complex frames).
 ```sh
 mkdir frames
 ...
@@ -35,11 +35,11 @@ Constants in the `backend.py` file can be changed to optimise or customise your 
 
 ```sh
 $ python backend.py -h
-backend.py -f <source> -e <extension> -c <colour> -b -d -l -g --static --block=<block size> --maxpblock=<max expressions per block>
+backend.py -f <source> -e <extension> -c <colour> -b -d -l -g --yes
 
 	-h	Get help
 
--Render options
+-Options
 
 	-f <source>	The directory from which the frames are stored (e.g. frames)
 	-e <extension>	The extension of the frame files (e.g. png)
@@ -48,30 +48,20 @@ backend.py -f <source> -e <extension> -c <colour> -b -d -l -g --static --block=<
 	-d		Download rendered frames automatically (only available if rendering quick.html)
 	-l		Reduce number of lines with L2 gradient for quicker renders
 	-g		Hide the grid in the background of the graph (only available if rendering quick.html)
-
--Optimisational options
-
-	--static					Use a static number of expressions per request block
-	--block=<block size>				The number of frames per block in dynamic blocks
-	--maxpblock=<maximum expressions per block>	The maximum number of expressions per block in static blocks
-
--Miscellaneous
-
-	--yes	Agree to EULA without input prompt
+	
+	--yes		Agree to EULA without input prompt
 ```
-
-You can use the optimisational options to change the number of expressions the backend will send to the frontend per call (too much will cause a memory error, too little could kill the backend with too many requests). Note that a "block" refers to what is passed from the backend to the frontend per HTTP request. These only really matter if you are rendering a video.
 
 Use `python backend.py -h` to see the above help message. Run without any command-line arguments to create a rendering with the same settings as seen in [this video](https://www.youtube.com/watch?v=BQvBq3K50u8). 
 
 #### Running the command
 
-Run backend (This may take a while depending on the size and complexity of the frames). It should eventually show that the server is running on `localhost:5000`.
+Run the backend (This may take a while depending on the size and complexity of the frames). It should eventually show that the server is running on `http://127.0.0.1:5000` with the render available at `http://127.0.0.1:5000/calculator`.
 ```sh
 python backend.py
 ```
 
-The following is an example of the output
+The following is an example of the output:
 ```sh
 $ python backend.py 
   _____                                
@@ -95,20 +85,23 @@ By using Desmos Bezier Renderer, you agree to comply to the [Desmos Terms of Ser
 -----------------------------
 Processing 513 frames... Please wait for processing to finish before running on frontend
 
---> Processing complete in 4.4 seconds
+--> Processing complete in 4.5 seconds
 
- * Serving Flask app "backend" (lazy loading)
- * Environment: production
-   WARNING: This is a development server. Do not use it in a production deployment.
-   Use a production WSGI server instead.
+		===========================================================================
+		|| GO CHECK OUT YOUR RENDER NOW AT:					 ||
+		||			http://127.0.0.1:5000/calculator		 ||
+		===========================================================================
+
+=== SERVER LOG (Ignore if not dev) ===
+ * Serving Flask app 'backend'
  * Debug mode: off
- * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on http://127.0.0.1:5000
+Press CTRL+C to quit
 
 ```
 
-Load `index.html` into a web browser and put `f=1` into the first formula in the formula window. The image should start rendering or the video should start playing at a slow rate. 
-
-Alternatively, you can load `quick.html` for a **quicker rendering** with **more consistent rendering time per frame** that also allows for the use of the automatic download (`-d`) and gridline removal (`-g`) options. This however will also lower the quality, cause frames to disappear immediately after rendering, and will not show equations in the left sidebar. The renders seen in the video [this video](https://www.youtube.com/watch?v=BQvBq3K50u8) use `index.html` whereas [this video](https://www.youtube.com/watch?v=c38ob_YC0IA) uses `quick.html`.
+Load `http://127.0.0.1:5000/calculator` into a web browser and put `f=1` into the first formula in the formula window. The image should start rendering or the video should start [playing at a slow rate](https://www.youtube.com/watch?v=BQvBq3K50u8).
 
 ![](github/final.png)
 
