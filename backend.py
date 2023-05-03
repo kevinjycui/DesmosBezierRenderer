@@ -47,7 +47,7 @@ def help():
     print('\t-d\t\tDownload rendered frames automatically')
     print('\t-l\t\tReduce number of lines with L2 gradient for quicker renders')
     print('\t-g\t\tHide the grid in the background of the graph\n')
-    print('\t--yes\tAgree to EULA without input prompt')
+    print('\t--yes\t\tAgree to EULA without input prompt')
 
 
 def get_contours(filename, nudge = .33):
