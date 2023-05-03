@@ -1,0 +1,155 @@
+<script src='https://www.desmos.com/api/v1.8/calculator.js?apiKey={{ api_key }}'></script>
+<html lang='en'>
+   <head>
+      <title>Desmos | Graphing Calculator</title>
+      <link rel='icon' href='https://www.desmos.com/assets/img/apps/graphing/favicon.ico'>
+   </head>
+   <div id='calculator' style='width: 100%; height: 100%;'></div>
+   <script>
+        var elt = document.getElementById('calculator');
+        var calculator = Desmos.GraphingCalculator(elt);
+
+        var inner = elt.getElementsByClassName('dcg-graph-outer')[0]; // The part of the screen with a visible grid
+        var defaultState;
+        var hiddenGraph;
+        var latex;
+
+        function sleep(milliseconds) {
+            return new Promise(r => setTimeout(r, milliseconds));
+        }
+
+        async function changeGraph(latex) {
+            //console.log(latex);
+
+            var default_expressions = hiddenGraph.expressions.list.slice();
+
+            for (var expr of latex) {
+                hiddenGraph.expressions.list.push({
+                    color: expr.color,
+                    id: expr.id,
+                    latex: expr.latex,
+                    type: "expression"
+                })
+            }
+
+            calculator.setState( hiddenGraph, {'allowUndo': false} );
+            hiddenGraph.expressions.list = default_expressions;
+
+            if (latex.length < 3000) {
+                await sleep(5000);
+            }
+        }
+
+        calculator.updateSettings({
+            showGrid: {{ show_grid|tojson }},
+            showXAxis: {{ show_grid|tojson }},
+            showYAxis: {{ show_grid|tojson }}
+        });
+
+        calculator.setMathBounds({
+            left: 0,
+            right: {{ width }},
+            bottom: 0,
+            top: {{ height }}
+        });
+
+        calculator.setExpression({ id: 'frame', latex: 'f=0', color: '#2464b4', sliderBounds: { step: 1, max: {{ total_frames }}, min: 0 } });
+        calculator.setExpression({ id: 'lines', latex: 'L=0', color: '#2464b4', sliderBounds: { step: 1, min: 0 } });
+
+        // This is used to set expressions off screen
+        hiddenGraph = calculator.getState();
+
+        const interval = setInterval(() => {
+            const f = calculator.HelperExpression({ latex: 'f' });
+            f.observe('numericValue', () => {
+                if (Number.isNaN(f.numericValue) || f.numericValue <= 0) return;
+                f.unobserve('numericValue');
+                clearInterval(interval);
+                setTimeout(() => renderFrame(--f.numericValue), 3000); // Wait for additional keystrokes
+            });
+        }, 500);
+        
+        defaultState = calculator.getState(); // setBlank resets graph settings, this doesn't
+        defaultState.graph.showGrid = defaultState.graph.showXAxis = defaultState.graph.showYAxis = {{ show_grid|tojson }};
+
+        var tmpState = calculator.getState();
+        tmpState.expressions.list.push({type: 'text', id: 'info', text: 'Hello and welcome to your Desmos rendering!\n\nYou will notice two variables:\n\t𝙛 represents the current frame (for if you are rendering an animation).\n\t𝙇 represents the number of Bezier curves currently displayed to make up your image.\n\n𝘉𝘦𝘻𝘪𝘦𝘳 𝘤𝘶𝘳𝘷𝘦𝘴 𝘢𝘳𝘦 𝘰𝘧𝘵𝘦𝘯 𝘶𝘴𝘦𝘥 𝘪𝘯 𝘷𝘦𝘤𝘵𝘰𝘳 𝘨𝘳𝘢𝘱𝘩𝘪𝘤𝘴 𝘱𝘳𝘰𝘨𝘳𝘢𝘮𝘴 𝘵𝘰 𝘥𝘪𝘴𝘱𝘭𝘢𝘺 𝘪𝘮𝘢𝘨𝘦𝘴 𝘴𝘶𝘤𝘩 𝘢𝘴 𝘵𝘩𝘦 𝘰𝘯𝘦𝘴 𝘺𝘰𝘶 𝘸𝘪𝘭𝘭 𝘴𝘦𝘦 𝘴𝘰𝘰𝘯!\n\n𝗧𝗼 𝗯𝗲𝗴𝗶𝗻 𝗿𝗲𝗻𝗱𝗲𝗿𝗶𝗻𝗴 𝗳𝗿𝗼𝗺 𝘁𝗵𝗲 𝘀𝘁𝗮𝗿𝘁, 𝘀𝗲𝘁 𝗳=𝟏.'});
+        calculator.setState(tmpState);
+
+        async function renderFrame(frame) {
+            
+            const requestData = (frame) => {
+            
+                return new Promise((resolve, reject) => {
+
+                    xhr = new XMLHttpRequest();
+                    xhr.open('GET', `http://127.0.0.1:5000/?frame=${frame}`);
+                    xhr.send();
+                    xhr.onload = () => {
+                        latex = JSON.parse(xhr.response);
+
+                        if (latex.result === null) {
+                            reject(`frame: ${frame} could not be rendered.`);
+                        } else {
+                            resolve(latex.result);
+                        }
+                    }
+                });
+            }
+
+            try { // Render each frame
+                var response = await requestData(frame);
+                while (frame < {{ total_frames }} && response) {
+                    hiddenGraph.expressions.list[0].latex = 'f=' + (frame + 1);
+                    hiddenGraph.expressions.list[1].latex = 'L=' + response.length;
+
+                    // console.log('Lines for frame ' + (frame + 1) + ': ' + response.length);
+
+                    await changeGraph(response);
+
+                    const params = {
+                        mode: 'stretch',
+                        mathBounds: { left: 0, bottom: 0, right: {{ width }}, top: {{ height }} },
+                        width: {{ width }},
+                        height: {{ height }},
+                        targetPixelRatio: 1
+                    }
+                    
+                    function finishRender() {
+                        return new Promise(resolve => {
+                             // Waits for frame to render, takes a screenshot and runs handleScreenshot
+                            calculator.asyncScreenshot(params, screenshot => {
+                                handleScreenshot(screenshot, frame +1);
+                                resolve('render has finished');
+                            });
+                        });
+                    }
+
+                    await finishRender();
+
+                    // this delay happens after the frame is rendered
+                    if (response.length >= 3000) { // a cooldown because this is a big file
+                        await sleep(5000);
+                    }
+
+                    frame++;
+                    response = await requestData(frame);
+                }
+            }
+            catch (err) {
+                console.log(err);
+            }
+        }
+
+        const imgcont = document.createElement('a');
+        document.body.appendChild(imgcont);
+        async function handleScreenshot(screenshot, frame) {
+            if ({{ download_images|tojson }}) {
+                imgcont.href = screenshot;
+                imgcont.download = 'frame-' + String(frame).padStart(5, '0');
+                imgcont.innerHTML = `<img src= ${screenshot}>`;
+                imgcont.click();
+            }
+        }
+   </script>
+</html>

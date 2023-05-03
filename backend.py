@@ -2,6 +2,7 @@ import json
 from flask import Flask
 from flask_cors import CORS
 from flask import request
+from flask import render_template
 
 from PIL import Image
 import numpy as np
@@ -16,13 +17,9 @@ import getopt
 import traceback
 
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='frontend')
 CORS(app)
 
-
-DYNAMIC_BLOCK = True # Automatically find the right block size
-BLOCK_SIZE = 25 # Number of frames per block (ignored if DYNAMIC_BLOCK is true)
-MAX_EXPR_PER_BLOCK = 7500 # Maximum lines per block, doesn't affect lines per frame (ignored if DYNAMIC_BLOCK is false)
 
 FRAME_DIR = 'frames' # The folder where the frames are stored relative to this file
 FILE_EXT = 'png' # Extension for frame files
@@ -40,21 +37,16 @@ frame_latex = 0
 
 
 def help():
-    print('backend.py -f <source> -e <extension> -c <colour> -b -d -l -g --static --block=<block size> --maxpblock=<max expressions per block>\n')
+    print('backend.py -f <source> -e <extension> -c <colour> -b -d -l -g --yes\n')
     print('\t-h\tGet help\n')
-    print('-Render options\n')
+    print('-Options\n')
     print('\t-f <source>\tThe directory from which the frames are stored (e.g. frames)')
     print('\t-e <extension>\tThe extension of the frame files (e.g. png)')
     print('\t-c <colour>\tThe colour of the lines to be drawn (e.g. #2464b4)')
     print('\t-b\t\tReduce number of lines with bilateral filter for simpler renders')
-    print('\t-d\t\tDownload rendered frames automatically (only available if rendering quick.html)')
+    print('\t-d\t\tDownload rendered frames automatically')
     print('\t-l\t\tReduce number of lines with L2 gradient for quicker renders')
-    print('\t-g\t\tHide the grid in the background of the graph (only available if rendering quick.html)\n')
-    print('-Optimisational options\n')
-    print('\t--static\t\t\t\t\tUse a static number of expressions per request block')
-    print('\t--block=<block size>\t\t\t\tThe number of frames per block in dynamic blocks')
-    print('\t--maxpblock=<maximum expressions per block>\tThe maximum number of expressions per block in static blocks\n')
-    print('-Miscellaneous\n')
+    print('\t-g\t\tHide the grid in the background of the graph\n')
     print('\t--yes\tAgree to EULA without input prompt')
 
 
@@ -129,31 +121,13 @@ def index():
     if frame >= len(os.listdir(FRAME_DIR)):
         return {'result': None}
 
-    """
-    block = []
-    if not DYNAMIC_BLOCK:
-        number_of_frames = min(frame + BLOCK_SIZE, len(os.listdir(FRAME_DIR))) - frame
-        for i in range(frame, frame + number_of_frames):
-            block.append(frame_latex[i])
-    else:
-        number_of_frames = 0
-        total = 0
-        i = frame
-        while total < MAX_EXPR_PER_BLOCK:
-            if i >= len(frame_latex):
-                break
-            number_of_frames += 1
-            total += len(frame_latex[i])
-            block.append(frame_latex[i])
-            i += 1
-    return json.dumps({'result': block, 'number_of_frames': number_of_frames}) # Number_of_frames is the number of newly loaded frames, not the total frames
-    """
     return json.dumps({'result': frame_latex[frame] })
 
 
-@app.route('/init')
-def init():
-    return json.dumps({'height': height.value, 'width': width.value, 'total_frames': len(os.listdir(FRAME_DIR)), 'download_images': DOWNLOAD_IMAGES, 'show_grid': SHOW_GRID})
+@app.route("/calculator")
+def client():
+    return render_template('index.html', api_key='dcb31709b452b1cf9dc26972add0fda6', # Development-only API_key. See https://www.desmos.com/api/v1.8/docs/index.html#document-api-keys
+            height=height.value, width=width.value, total_frames=len(os.listdir(FRAME_DIR)), download_images=DOWNLOAD_IMAGES, show_grid=SHOW_GRID)
 
 
 if __name__ == '__main__':
@@ -187,12 +161,6 @@ if __name__ == '__main__':
                 USE_L2_GRADIENT = True
             elif opt == '-g':
                 SHOW_GRID = False
-            elif opt == '--static':
-                DYNAMIC_BLOCK = False
-            elif opt == '--block':
-                BLOCK_SIZE = int(arg)
-            elif opt == '--maxpblock':
-                MAX_EXPR_PER_BLOCK = int(arg)
             elif opt == '--yes':
                 eula = 'y'
         frame_latex =  range(len(os.listdir(FRAME_DIR)))
@@ -245,6 +213,11 @@ By using Desmos Bezier Renderer, you agree to comply to the [Desmos Terms of Ser
             sys.exit(2)
 
         print('\r--> Processing complete in %.1f seconds\n' % (time() - start))
+        print('\t\t===========================================================================')
+        print('\t\t|| GO CHECK OUT YOUR RENDER NOW AT:\t\t\t\t\t ||')
+        print('\t\t||\t\t\thttp://127.0.0.1:5000/calculator\t\t ||')
+        print('\t\t===========================================================================\n')
+        print('=== SERVER LOG (Ignore if not dev) ===')
 
         # with open('cache.json', 'w+') as f:
         #     json.dump(frame_latex, f)

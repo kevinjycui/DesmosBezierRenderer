@@ -39,7 +39,7 @@ backend.py -f <source> -e <extension> -c <colour> -b -d -l -g --static --block=<
 
 	-h	Get help
 
--Render options
+-Options
 
 	-f <source>	The directory from which the frames are stored (e.g. frames)
 	-e <extension>	The extension of the frame files (e.g. png)
@@ -48,15 +48,6 @@ backend.py -f <source> -e <extension> -c <colour> -b -d -l -g --static --block=<
 	-d		Download rendered frames automatically (only available if rendering quick.html)
 	-l		Reduce number of lines with L2 gradient for quicker renders
 	-g		Hide the grid in the background of the graph (only available if rendering quick.html)
-
--Optimisational options
-
-	--static					Use a static number of expressions per request block
-	--block=<block size>				The number of frames per block in dynamic blocks
-	--maxpblock=<maximum expressions per block>	The maximum number of expressions per block in static blocks
-
--Miscellaneous
-
 	--yes	Agree to EULA without input prompt
 ```
 
