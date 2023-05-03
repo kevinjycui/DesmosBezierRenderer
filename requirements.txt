@@ -1,4 +1,4 @@
-Flask==2.1.0
+Flask==2.2.5
 Flask_Cors==3.0.10
 numpy==1.23.0
 opencv_contrib_python==4.6.0.66
