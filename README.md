@@ -45,9 +45,9 @@ backend.py -f <source> -e <extension> -c <colour> -b -d -l -g --yes
 	-e <extension>	The extension of the frame files (e.g. png)
 	-c <colour>	The colour of the lines to be drawn (e.g. #2464b4)
 	-b		Reduce number of lines with bilateral filter for simpler renders
-	-d		Download rendered frames automatically (only available if rendering quick.html)
+	-d		Download rendered frames automatically
 	-l		Reduce number of lines with L2 gradient for quicker renders
-	-g		Hide the grid in the background of the graph (only available if rendering quick.html)
+	-g		Hide the grid in the background of the graph
 	
 	--yes		Agree to EULA without input prompt
 ```
