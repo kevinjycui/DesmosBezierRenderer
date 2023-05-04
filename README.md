@@ -27,6 +27,7 @@ pip install -r requirements.txt
 ```
 Replace the images in the `frames` directory with your own and name each image `frame%d.png` where `%d` represents the frame-number starting from 1. To render just a single image, add a single image named `frame1.png` in the directory. The renderer will work best with 360p to 480p resolution images (you may have to lower the resolution further with more complex frames).
 ```sh
+rm -r frames
 mkdir frames
 ...
 ```
