@@ -62,8 +62,8 @@
         const interval = setInterval(() => {
             const f = calculator.HelperExpression({ latex: 'f' });
             f.observe('numericValue', () => {
-                if (Number.isNaN(f.numericValue) || f.numericValue <= 0) return;
                 f.unobserve('numericValue');
+                if (Number.isNaN(f.numericValue) || f.numericValue <= 0) return;
                 clearInterval(interval);
                 setTimeout(() => renderFrame(--f.numericValue), 3000); // Wait for additional keystrokes
             });
