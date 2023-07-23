@@ -25,6 +25,7 @@ FRAME_DIR = 'frames' # The folder where the frames are stored relative to this f
 FILE_EXT = 'png' # Extension for frame files
 COLOUR = '#2464b4' # Hex value of colour for graph output	
 SCREENSHOT_SIZE = [ None, None ] # [width, height] for downloaded images
+SCREENSHOT_FORMAT = 'png' # Format to use when downloading images
 
 BILATERAL_FILTER = False # Reduce number of lines with bilateral filter
 DOWNLOAD_IMAGES = False # Download each rendered frame automatically (works best in firefox)
@@ -50,6 +51,7 @@ def help():
     print('\t-g\t\tHide the grid in the background of the graph\n')
     print('\t--yes\t\tAgree to EULA without input prompt')
     print('\t--size <widthxheight>\tDimensions for downloaded images (e.g. 3840x2160)')
+    print('\t--format <extension>\tSpecify format when downloading frames: "svg" or "png" (default is "png")')
 
 
 def get_contours(filename, nudge = .33):
@@ -129,13 +131,13 @@ def index():
 @app.route("/calculator")
 def client():
     return render_template('index.html', api_key='dcb31709b452b1cf9dc26972add0fda6', # Development-only API_key. See https://www.desmos.com/api/v1.8/docs/index.html#document-api-keys
-            height=height.value, width=width.value, total_frames=len(os.listdir(FRAME_DIR)), download_images=DOWNLOAD_IMAGES, show_grid=SHOW_GRID, screenshot_size=SCREENSHOT_SIZE)
+            height=height.value, width=width.value, total_frames=len(os.listdir(FRAME_DIR)), download_images=DOWNLOAD_IMAGES, show_grid=SHOW_GRID, screenshot_size=SCREENSHOT_SIZE, screenshot_format=SCREENSHOT_FORMAT)
 
 
 if __name__ == '__main__':
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hf:e:c:bdlg", ['static', 'block=', 'maxpblock=', 'yes', 'size='])
+        opts, args = getopt.getopt(sys.argv[1:], "hf:e:c:bdlg", ['static', 'block=', 'maxpblock=', 'yes', 'size=', 'format='])
 
     except getopt.GetoptError:
         print('Error: Invalid argument(s)\n')
@@ -170,6 +172,10 @@ if __name__ == '__main__':
 
                 if len(SCREENSHOT_SIZE) != 2:
                     raise ValueError
+            elif opt == '--format':
+                if arg not in ('svg', 'png'):
+                    raise ValueError
+                SCREENSHOT_FORMAT = arg
                 
         frame_latex =  range(len(os.listdir(FRAME_DIR)))
 
