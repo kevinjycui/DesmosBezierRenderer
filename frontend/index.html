@@ -108,10 +108,10 @@
                     await changeGraph(response);
 
                     const params = {
-                        mode: 'stretch',
+                        mode: 'contain',
                         mathBounds: { left: 0, bottom: 0, right: {{ width }}, top: {{ height }} },
-                        width: {{ width }},
-                        height: {{ height }},
+                        width: {{ screenshot_size|tojson }}[0] || window.screen.width,
+                        height: {{ screenshot_size|tojson }}[1] || window.screen.height,
                         targetPixelRatio: 1
                     }
                     

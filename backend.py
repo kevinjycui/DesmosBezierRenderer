@@ -24,6 +24,7 @@ CORS(app)
 FRAME_DIR = 'frames' # The folder where the frames are stored relative to this file
 FILE_EXT = 'png' # Extension for frame files
 COLOUR = '#2464b4' # Hex value of colour for graph output	
+SCREENSHOT_SIZE = [ None, None ] # [width, height] for downloaded images
 
 BILATERAL_FILTER = False # Reduce number of lines with bilateral filter
 DOWNLOAD_IMAGES = False # Download each rendered frame automatically (works best in firefox)
@@ -48,6 +49,7 @@ def help():
     print('\t-l\t\tReduce number of lines with L2 gradient for quicker renders')
     print('\t-g\t\tHide the grid in the background of the graph\n')
     print('\t--yes\t\tAgree to EULA without input prompt')
+    print('\t--size <widthxheight>\tDimensions for downloaded images (e.g. 3840x2160)')
 
 
 def get_contours(filename, nudge = .33):
@@ -127,13 +129,13 @@ def index():
 @app.route("/calculator")
 def client():
     return render_template('index.html', api_key='dcb31709b452b1cf9dc26972add0fda6', # Development-only API_key. See https://www.desmos.com/api/v1.8/docs/index.html#document-api-keys
-            height=height.value, width=width.value, total_frames=len(os.listdir(FRAME_DIR)), download_images=DOWNLOAD_IMAGES, show_grid=SHOW_GRID)
+            height=height.value, width=width.value, total_frames=len(os.listdir(FRAME_DIR)), download_images=DOWNLOAD_IMAGES, show_grid=SHOW_GRID, screenshot_size=SCREENSHOT_SIZE)
 
 
 if __name__ == '__main__':
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hf:e:c:bdlg", ['static', 'block=', 'maxpblock=', 'yes'])
+        opts, args = getopt.getopt(sys.argv[1:], "hf:e:c:bdlg", ['static', 'block=', 'maxpblock=', 'yes', 'size='])
 
     except getopt.GetoptError:
         print('Error: Invalid argument(s)\n')
@@ -163,9 +165,15 @@ if __name__ == '__main__':
                 SHOW_GRID = False
             elif opt == '--yes':
                 eula = 'y'
+            elif opt == '--size':
+                SCREENSHOT_SIZE = [ int(n) for n in arg.split('x', maxsplit=1) ]
+
+                if len(SCREENSHOT_SIZE) != 2:
+                    raise ValueError
+                
         frame_latex =  range(len(os.listdir(FRAME_DIR)))
 
-    except TypeError:
+    except (TypeError, ValueError):
         print('Error: Invalid argument(s)\n')
         help()
         sys.exit(2)
