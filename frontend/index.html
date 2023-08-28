@@ -108,11 +108,12 @@
                     await changeGraph(response);
 
                     const params = {
-                        mode: 'stretch',
+                        mode: 'contain',
                         mathBounds: { left: 0, bottom: 0, right: {{ width }}, top: {{ height }} },
-                        width: {{ width }},
-                        height: {{ height }},
-                        targetPixelRatio: 1
+                        width: {{ screenshot_size|tojson }}[0] || window.screen.width,
+                        height: {{ screenshot_size|tojson }}[1] || window.screen.height,
+                        targetPixelRatio: 1,
+                        format: {{ screenshot_format|tojson }}
                     }
                     
                     function finishRender() {
@@ -144,12 +145,24 @@
         const imgcont = document.createElement('a');
         document.body.appendChild(imgcont);
         async function handleScreenshot(screenshot, frame) {
-            if ({{ download_images|tojson }}) {
-                imgcont.href = screenshot;
-                imgcont.download = 'frame-' + String(frame).padStart(5, '0');
-                imgcont.innerHTML = `<img src= ${screenshot}>`;
-                imgcont.click();
+
+            if (!{{ download_images|tojson }}) {
+                return;
             }
+
+            if ( {{ screenshot_format|tojson }} === 'png' ) {
+                screenshot_uri = screenshot;
+            }
+            else if ( {{ screenshot_format|tojson }} === 'svg' ) {
+                var svg_b64 = window.btoa(screenshot); // encode to base64
+                screenshot_uri = "data:image/svg+xml;base64," + svg_b64;
+            }
+
+            imgcont.href = screenshot_uri;
+            imgcont.download = 'frame-' + String(frame).padStart(5, '0');
+            imgcont.innerHTML = `<img src= ${screenshot_uri}>`;
+            imgcont.click();
+            
         }
    </script>
 </html>
