@@ -15,10 +15,13 @@ import os
 import sys
 import getopt
 import traceback
+import webbrowser
+from threading import Timer
 
 
 app = Flask(__name__, template_folder='frontend')
 CORS(app)
+PORT = 5000
 
 
 FRAME_DIR = 'frames' # The folder where the frames are stored relative to this file
@@ -26,6 +29,7 @@ FILE_EXT = 'png' # Extension for frame files
 COLOUR = '#2464b4' # Hex value of colour for graph output	
 SCREENSHOT_SIZE = [ None, None ] # [width, height] for downloaded images
 SCREENSHOT_FORMAT = 'png' # Format to use when downloading images
+OPEN_BROWSER = True # Open default browser automatically
 
 BILATERAL_FILTER = False # Reduce number of lines with bilateral filter
 DOWNLOAD_IMAGES = False # Download each rendered frame automatically (works best in firefox)
@@ -39,17 +43,18 @@ frame_latex = 0
 
 
 def help():
-    print('backend.py -f <source> -e <extension> -c <colour> -b -d -l -g --yes\n')
-    print('\t-h\tGet help\n')
+    print('backend.py -f <source> -e <extension> -c <colour> -b -d -l -g --yes --no-browser --size <widthxheight> --format <extension>\n')
+    print('\t-h\t\t\tGet help\n')
     print('-Options\n')
-    print('\t-f <source>\tThe directory from which the frames are stored (e.g. frames)')
-    print('\t-e <extension>\tThe extension of the frame files (e.g. png)')
-    print('\t-c <colour>\tThe colour of the lines to be drawn (e.g. #2464b4)')
-    print('\t-b\t\tReduce number of lines with bilateral filter for simpler renders')
-    print('\t-d\t\tDownload rendered frames automatically')
-    print('\t-l\t\tReduce number of lines with L2 gradient for quicker renders')
-    print('\t-g\t\tHide the grid in the background of the graph\n')
-    print('\t--yes\t\tAgree to EULA without input prompt')
+    print('\t-f <source>\t\tThe directory from which the frames are stored (e.g. frames)')
+    print('\t-e <extension>\t\tThe extension of the frame files (e.g. png)')
+    print('\t-c <colour>\t\tThe colour of the lines to be drawn (e.g. #2464b4)')
+    print('\t-b\t\t\tReduce number of lines with bilateral filter for simpler renders')
+    print('\t-d\t\t\tDownload rendered frames automatically')
+    print('\t-l\t\t\tReduce number of lines with L2 gradient for quicker renders')
+    print('\t-g\t\t\tHide the grid in the background of the graph\n')
+    print('\t--yes\t\t\tAgree to EULA without input prompt')
+    print('\t--no-browser\t\tRun renderer server without opening a web browser')
     print('\t--size <widthxheight>\tDimensions for downloaded images (e.g. 3840x2160)')
     print('\t--format <extension>\tSpecify format when downloading frames: "svg" or "png" (default is "png")')
 
@@ -137,7 +142,7 @@ def client():
 if __name__ == '__main__':
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hf:e:c:bdlg", ['static', 'block=', 'maxpblock=', 'yes', 'size=', 'format='])
+        opts, args = getopt.getopt(sys.argv[1:], "hf:e:c:bdlg", ['static', 'block=', 'maxpblock=', 'yes', 'no-browser', 'size=', 'format='])
 
     except getopt.GetoptError:
         print('Error: Invalid argument(s)\n')
@@ -167,6 +172,8 @@ if __name__ == '__main__':
                 SHOW_GRID = False
             elif opt == '--yes':
                 eula = 'y'
+            elif opt == '--no-browser':
+                OPEN_BROWSER = False
             elif opt == '--size':
                 SCREENSHOT_SIZE = [ int(n) for n in arg.split('x', maxsplit=1) ]
 
@@ -229,11 +236,16 @@ By using Desmos Bezier Renderer, you agree to comply to the [Desmos Terms of Ser
         print('\r--> Processing complete in %.1f seconds\n' % (time() - start))
         print('\t\t===========================================================================')
         print('\t\t|| GO CHECK OUT YOUR RENDER NOW AT:\t\t\t\t\t ||')
-        print('\t\t||\t\t\thttp://127.0.0.1:5000/calculator\t\t ||')
+        print('\t\t||\t\t\thttp://127.0.0.1:%d/calculator\t\t ||' % PORT)
         print('\t\t===========================================================================\n')
         print('=== SERVER LOG (Ignore if not dev) ===')
 
         # with open('cache.json', 'w+') as f:
         #     json.dump(frame_latex, f)
 
-        app.run()
+        if OPEN_BROWSER:
+            def open_browser():
+                webbrowser.open('http://127.0.0.1:%d/calculator' % PORT)
+            Timer(1, open_browser).start()
+
+        app.run(host='127.0.0.1', port=PORT)

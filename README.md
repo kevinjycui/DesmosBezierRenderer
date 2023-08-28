@@ -36,21 +36,26 @@ Constants in the `backend.py` file can be changed to optimise or customise your 
 
 ```sh
 $ python backend.py -h
-backend.py -f <source> -e <extension> -c <colour> -b -d -l -g --yes
+backend.py -f <source> -e <extension> -c <colour> -b -d -l -g --yes --no-browser --size <widthxheight> --format <extension>
 
-	-h	Get help
+	-h			Get help
 
 -Options
 
-	-f <source>	The directory from which the frames are stored (e.g. frames)
-	-e <extension>	The extension of the frame files (e.g. png)
-	-c <colour>	The colour of the lines to be drawn (e.g. #2464b4)
-	-b		Reduce number of lines with bilateral filter for simpler renders
-	-d		Download rendered frames automatically
-	-l		Reduce number of lines with L2 gradient for quicker renders
-	-g		Hide the grid in the background of the graph
-	
-	--yes		Agree to EULA without input prompt
+	-f <source>		The directory from which the frames are stored (e.g. frames)
+	-e <extension>		The extension of the frame files (e.g. png)
+	-c <colour>		The colour of the lines to be drawn (e.g. #2464b4)
+	-b			Reduce number of lines with bilateral filter for simpler renders
+	-d			Download rendered frames automatically
+	-l			Reduce number of lines with L2 gradient for quicker renders
+	-g			Hide the grid in the background of the graph
+
+	--yes			Agree to EULA without input prompt
+	--no-browser		Run renderer server without opening a web browser
+	--size <widthxheight>	Dimensions for downloaded images (e.g. 3840x2160)
+	--format <extension>	Specify format when downloading frames: "svg" or "png" (default is "png")
+
+
 ```
 
 Use `python backend.py -h` to see the above help message. Run without any command-line arguments to create a rendering with the same settings as seen in [this video](https://www.youtube.com/watch?v=BQvBq3K50u8). 
